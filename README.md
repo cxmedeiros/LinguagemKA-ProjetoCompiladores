@@ -355,25 +355,4 @@ Ao analisar os tokens, o Parser identifica que era esperado um `SEMICOLON` depoi
 
 O projeto possui ainda um mecanismo de **sincronização após erros sintáticos**, permitindo que o Parser tente continuar a análise do restante do código.
 
----
 
-## Principais conceitos utilizados
-
-Nesta etapa do projeto são aplicados conceitos como:
-
-- análise léxica;
-- tokens;
-- análise sintática;
-- gramática;
-- Parser Descendente Recursivo;
-- precedência de operadores;
-- Abstract Syntax Tree (AST);
-- expressões e statements;
-- tratamento de erros sintáticos;
-- recuperação e sincronização após erros.
-
-## Objetivo
-
-O objetivo desta etapa é implementar o **front-end inicial da linguagem Ka**, transformando o código-fonte primeiro em tokens e, posteriormente, em uma representação sintática estruturada através da AST.
-
-As etapas posteriores de análise semântica e interpretação não fazem parte desta versão do projeto.
