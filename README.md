@@ -355,7 +355,7 @@ Ao analisar os tokens, o Parser identifica que era esperado um `SEMICOLON` depoi
 
 O projeto possui ainda um mecanismo de **sincronização após erros sintáticos**, permitindo que o Parser tente continuar a análise do restante do código.
 
-##Integrantes
+## Integrantes
 
 | Nome completo                   | Login institucional |
 |---------------------------------|----------------------|
