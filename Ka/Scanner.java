@@ -179,7 +179,7 @@ class Scanner {
         String text = source.substring(start, current);
         TokenType type = keywords.get(text);
         if (type == null) type = IDENTIFIER;
-        addToken(type);
+        addToken(type); 
     }
 
     private void addToken(TokenType type) {
@@ -190,4 +190,4 @@ class Scanner {
         String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
     }
-}
+}

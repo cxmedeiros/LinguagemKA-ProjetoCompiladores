@@ -7,17 +7,7 @@ package ka;
  * Essa classe espelha de proposito a mesma relacao que Token tem com
  * TokenType - uma classe "de fora" guardando um enum "de dentro":
  *
- *   Token    { TokenType type, String lexeme, Object literal, int line }
- *   Operator { Kind kind,                                      int line }
- *
  * Por que separar de Token, igual fizemos com Symbol para nomes:
- *
- *   Token tem campos que nao fazem sentido pra um operador dentro da
- *   AST - "literal" nunca e preenchido para "+" ou "==", e o "lexeme"
- *   e so uma representacao textual que da pra recalcular a partir do
- *   proprio Kind (ver metodo lexeme() abaixo). O unico motivo de ainda
- *   guardar algo alem do Kind e a LINHA, usada em mensagens de erro em
- *   tempo de execucao (ex: "Operando deve ser numero. [linha 7]").
  *
  * Diferenca de Operator para TokenType: TokenType cobre TODOS os tokens
  * possiveis da linguagem (palavras reservadas, pontuacao, EOF...).
@@ -47,18 +37,18 @@ public class Operator {
     }
 
     final Kind kind;
-    final int line;
+    final SourceLocation location;
 
-    Operator(Kind kind, int line) {
+    Operator(Kind kind, SourceLocation location) {
         this.kind = kind;
-        this.line = line;
+        this.location = location;
     }
 
     // Conveniencia: constroi um Operator a partir do Token que o
     // Scanner produziu. E aqui que a traducao TokenType -> Kind
     // acontece - a unica ponte entre a fase lexica e este tipo.
     Operator(Token token) {
-        this(kindOf(token.type), token.line);
+        this(kindOf(token.type), new SourceLocation(token));
     }
 
     private static Kind kindOf(TokenType type) {

@@ -53,7 +53,8 @@ class Parser {
         }
     }
 
-
+    // funDecl -> "fun" IDENTIFIER "(" parameters? ")" block
+    // (o "fun" ja foi consumido por declaration())
     private Stmt.Function function() {
         Token name = consume(IDENTIFIER, "Esperado o nome da funcao.");
         consume(LEFT_PAREN, "Esperado '(' depois do nome da funcao.");
@@ -107,6 +108,11 @@ class Parser {
         return expressionStatement();
     }
 
+    // O "for" nao existe na AST: vira um While dentro de um Block.
+    //
+    //   for (init; cond; inc) body
+    //     =>
+    //   { init; while (cond) { body; inc; } }
     private Stmt forStatement() {
         consume(LEFT_PAREN, "Esperado '(' depois de 'for'.");
 
@@ -262,11 +268,18 @@ class Parser {
         return statements;
     }
 
+    // ---------------------------------------------------------------
+    // Expressoes (uma funcao por nivel de precedencia)
+    // ---------------------------------------------------------------
 
     private Expr expression() {
         return assignment();
     }
 
+    // assignment -> ( call "." )? IDENTIFIER "=" assignment | logic_or
+    //
+    // Estrategia: le o lado esquerdo como expressao comum; so se aparecer
+    // um "=" depois e que descobrimos que era um alvo de atribuicao.
     private Expr assignment() {
         Expr expr = or();
 
@@ -371,6 +384,8 @@ class Parser {
         return call();
     }
 
+    // call -> primary ( "(" arguments? ")" | "." IDENTIFIER )*
+    // Aceita encadeamento: a.b(1).c.d(2)
     private Expr call() {
         Expr expr = primary();
 
@@ -463,6 +478,9 @@ class Parser {
         return new Expr.ObjectLiteral(keys, values);
     }
 
+    // ---------------------------------------------------------------
+    // Ferramentas de navegacao pelos tokens
+    // ---------------------------------------------------------------
 
     // Se o token atual for de algum dos tipos, consome e devolve true.
     private boolean match(TokenType... types) {

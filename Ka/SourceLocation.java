@@ -2,8 +2,6 @@ package ka;
 
 /*
  * Hoje guarda so a linha. A ideia e evoluir pra incluir coluna e arquivo
- * sem refatorar a AST - mudar so esta classe basta, porque todos os nos
- * que a usam ganham os campos novos de graca.  
  */
 public class SourceLocation {
     final int line;
@@ -20,4 +18,4 @@ public class SourceLocation {
     public String toString() {
         return "linha " + line;
     }
-}
+}
