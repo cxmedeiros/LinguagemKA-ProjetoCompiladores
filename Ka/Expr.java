@@ -1,0 +1,205 @@
+package com.craftinginterpreters.ka;
+
+import java.util.List;
+
+abstract class Expr {
+  interface Visitor<R> {
+    R visitAssignExpr(Assign expr);
+    R visitBinaryExpr(Binary expr);
+    R visitCallExpr(Call expr);
+    R visitFunctionExpr(Function expr);
+    R visitGetExpr(Get expr);
+    R visitGroupingExpr(Grouping expr);
+    R visitLiteralExpr(Literal expr);
+    R visitLogicalExpr(Logical expr);
+    R visitObjectLiteralExpr(ObjectLiteral expr);
+    R visitSetExpr(Set expr);
+    R visitThisExpr(This expr);
+    R visitUnaryExpr(Unary expr);
+    R visitVariableExpr(Variable expr);
+  }
+
+  static class Assign extends Expr {
+    Assign(Symbol name, Expr value) {
+      this.name = name;
+      this.value = value;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitAssignExpr(this);
+    }
+
+    final Symbol name;
+    final Expr value;
+  }
+
+  static class Binary extends Expr {
+    Binary(Expr left, Operator operator, Expr right) {
+      this.left = left;
+      this.operator = operator;
+      this.right = right;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitBinaryExpr(this);
+    }
+
+    final Expr left;
+    final Operator operator;
+    final Expr right;
+  }
+
+  static class Call extends Expr {
+    Call(Expr callee, SourceLocation location, List<Expr> arguments) {
+      this.callee = callee;
+      this.location = location;
+      this.arguments = arguments;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitCallExpr(this);
+    }
+
+    final Expr callee;
+    final SourceLocation location;
+    final List<Expr> arguments;
+  }
+
+  static class Function extends Expr {
+    Function(List<Symbol> params, List<Stmt> body) {
+      this.params = params;
+      this.body = body;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitFunctionExpr(this);
+    }
+
+    final List<Symbol> params;
+    final List<Stmt> body;
+  }
+
+  static class Get extends Expr {
+    Get(Expr object, Symbol name) {
+      this.object = object;
+      this.name = name;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitGetExpr(this);
+    }
+
+    final Expr object;
+    final Symbol name;
+  }
+
+  static class Grouping extends Expr {
+    Grouping(Expr expression) {
+      this.expression = expression;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitGroupingExpr(this);
+    }
+
+    final Expr expression;
+  }
+
+  static class Literal extends Expr {
+    Literal(Object value) {
+      this.value = value;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitLiteralExpr(this);
+    }
+
+    final Object value;
+  }
+
+  static class Logical extends Expr {
+    Logical(Expr left, Operator operator, Expr right) {
+      this.left = left;
+      this.operator = operator;
+      this.right = right;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitLogicalExpr(this);
+    }
+
+    final Expr left;
+    final Operator operator;
+    final Expr right;
+  }
+
+  static class ObjectLiteral extends Expr {
+    ObjectLiteral(List<Symbol> keys, List<Expr> values) {
+      this.keys = keys;
+      this.values = values;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitObjectLiteralExpr(this);
+    }
+
+    final List<Symbol> keys;
+    final List<Expr> values;
+  }
+
+  static class Set extends Expr {
+    Set(Expr object, Symbol name, Expr value) {
+      this.object = object;
+      this.name = name;
+      this.value = value;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitSetExpr(this);
+    }
+
+    final Expr object;
+    final Symbol name;
+    final Expr value;
+  }
+
+  static class This extends Expr {
+    This(Symbol keyword) {
+      this.keyword = keyword;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitThisExpr(this);
+    }
+
+    final Symbol keyword;
+  }
+
+  static class Unary extends Expr {
+    Unary(Operator operator, Expr right) {
+      this.operator = operator;
+      this.right = right;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitUnaryExpr(this);
+    }
+
+    final Operator operator;
+    final Expr right;
+  }
+
+  static class Variable extends Expr {
+    Variable(Symbol name) {
+      this.name = name;
+    }
+
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitVariableExpr(this);
+    }
+
+    final Symbol name;
+  }
+
+  abstract <R> R accept(Visitor<R> visitor);
+}
