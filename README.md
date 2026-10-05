@@ -1,84 +1,215 @@
-# Ka Language — Scanner e Parser
+# Ka Language — Scanner, Parser e AST
 
-Este projeto implementa as etapas iniciais de uma linguagem de programação chamada **Ka**, desenvolvida em Java como parte do estudo de Compiladores.
+A **Ka** é uma linguagem de programação desenvolvida em Java como projeto da disciplina de Compiladores.
 
-Nesta versão, o projeto contempla a **análise léxica (Scanner/Lexer)** e a **análise sintática (Parser)**, incluindo a construção da **Árvore Sintática Abstrata (AST)**.
+Nesta etapa do projeto, implementamos o **front-end da linguagem até a análise sintática**, incluindo:
 
-## Fluxo do projeto
+- análise léxica com Scanner/Lexer;
+- geração de tokens;
+- análise sintática com Parser descendente recursivo;
+- construção da Árvore Sintática Abstrata (AST);
+- impressão da AST para visualização e depuração;
+- tratamento de erros léxicos e sintáticos.
 
-O processamento realizado nesta etapa pode ser representado por:
-
-```text
-Código-fonte
-     ↓
-Scanner / Lexer
-     ↓
-Tokens
-     ↓
-Parser
-     ↓
-AST
-```
-
-O objetivo, neste momento é  analisar sua estrutura de forma léxica e sintática.
+A arquitetura utiliza como referência conceitos apresentados em *Crafting Interpreters*, de Robert Nystrom, com extensões e adaptações feitas para a linguagem Ka.
 
 ---
 
-## 1. Scanner / Lexer
+## Fluxo do projeto
+
+Atualmente, o processamento da Ka segue este fluxo:
+
+```text
+Código-fonte (.ka)
+        ↓
+      Scanner
+        ↓
+   List<Token>
+        ↓
+      Parser
+        ↓
+       AST
+        ↓
+   AstPrinter
+        ↓
+Representação textual da AST
+```
+
+O projeto atual termina na construção e visualização da AST. A execução semântica completa da linguagem não faz parte desta etapa.
+
+---
+
+# 1. Scanner / Lexer
 
 O `Scanner` é responsável pela **análise léxica**.
 
-Ele percorre o código-fonte caractere por caractere e identifica os diferentes elementos da linguagem, transformando-os em **tokens**.
+Ele percorre o código-fonte caractere por caractere e agrupa esses caracteres em unidades chamadas **tokens**.
 
 Por exemplo:
 
 ```ka
-var x = 10 + 5;
+var x = 10 + 5 * 2;
 ```
 
-pode gerar uma sequência de tokens equivalente a:
+gera tokens equivalentes a:
 
 ```text
 VAR
-IDENTIFIER(x)
+IDENTIFIER
 EQUAL
-NUMBER(10)
+INT
 PLUS
-NUMBER(5)
+INT
+STAR
+INT
 SEMICOLON
 EOF
 ```
 
-Entre os elementos reconhecidos pelo Scanner estão:
-
-- palavras-chave;
-- identificadores;
-- números;
-- strings;
-- operadores;
-- símbolos;
-- delimitadores.
-
-Os tokens são representados principalmente pelas classes:
+Cada token é representado pela classe `Token` e possui:
 
 ```text
-Token.java
-TokenType.java
+type
+lexeme
+literal
+line
+```
+
+Onde:
+
+- `type` representa a categoria do token;
+- `lexeme` contém o texto original encontrado no código;
+- `literal` contém o valor convertido, quando aplicável;
+- `line` indica a linha do código-fonte em que o token foi encontrado.
+
+Por exemplo, para:
+
+```ka
+10
+```
+
+o Scanner produz conceitualmente:
+
+```text
+type    = INT
+lexeme  = "10"
+literal = 10
+line    = 1
 ```
 
 ---
 
-## 2. Parser
+## Inteiros e números de ponto flutuante
 
-Após a análise léxica, os tokens são enviados para o `Parser`.
+A Ka diferencia números inteiros e números de ponto flutuante já durante a análise léxica.
 
-O Parser é responsável pela **análise sintática**, verificando se a sequência de tokens corresponde às regras gramaticais da linguagem e construindo uma representação estruturada do código.
+```ka
+var inteiro = 10;
+var decimal = 10.5;
+```
 
-O projeto utiliza um **Parser Descendente Recursivo (Recursive Descent Parser)**.
+O Scanner gera:
 
-Nesse tipo de parser, diferentes regras da gramática são implementadas através de métodos Java.
+```text
+10   → INT   → Integer
+10.5 → FLOAT → Double
+```
+
+Essa é uma extensão em relação à representação genérica de números utilizada na implementação de referência.
+
+---
+
+## Palavras reservadas
+
+Entre as palavras reservadas reconhecidas atualmente estão:
+
+```text
+and
+case
+default
+else
+false
+for
+fun
+if
+nil
+or
+print
+return
+switch
+this
+true
+var
+while
+```
+
+Quando o Scanner encontra uma sequência de caracteres válida para um identificador, ele verifica se ela corresponde a uma dessas palavras.
 
 Por exemplo:
+
+```ka
+var
+```
+
+é classificado como:
+
+```text
+VAR
+```
+
+enquanto:
+
+```ka
+resultado
+```
+
+é classificado como:
+
+```text
+IDENTIFIER
+```
+
+---
+
+# 2. Parser
+
+Após a análise léxica, a lista de tokens é enviada ao `Parser`.
+
+O Parser realiza a **análise sintática**, verificando se a sequência de tokens corresponde às regras gramaticais da Ka.
+
+A implementação utiliza um **Parser Descendente Recursivo (Recursive Descent Parser)**.
+
+De forma simplificada:
+
+```text
+parse
+  ↓
+declaration
+  ↓
+statement
+```
+
+O Parser reconhece construções como:
+
+- declarações de variáveis;
+- funções;
+- funções anônimas;
+- blocos;
+- `if` / `else`;
+- `while`;
+- `for`;
+- `switch` / `case` / `default`;
+- `print`;
+- `return`;
+- expressões;
+- chamadas de função;
+- objetos e propriedades.
+
+---
+
+# 3. Precedência de operadores
+
+A precedência é definida pela própria estrutura do Parser:
 
 ```text
 expression
@@ -104,102 +235,498 @@ call
 primary
 ```
 
-Essa organização também define a precedência dos operadores.
-
 Por exemplo:
 
 ```ka
 2 + 3 * 4
 ```
 
-é representado estruturalmente como:
+é interpretado sintaticamente como:
 
 ```text
-      +
-     / \
-    2   *
-       / \
-      3   4
+       +
+      / \
+     2   *
+        / \
+       3   4
 ```
 
-Assim, a multiplicação possui precedência maior que a soma.
+Portanto:
+
+```text
+2 + (3 * 4)
+```
+
+e não:
+
+```text
+(2 + 3) * 4
+```
 
 ---
 
-## 3. AST — Abstract Syntax Tree
+# 4. AST — Abstract Syntax Tree
 
-O resultado da análise sintática é representado através de uma **Árvore Sintática Abstrata (AST)**.
+Após reconhecer a estrutura sintática do programa, o Parser constrói uma **Árvore Sintática Abstrata (AST)**.
 
-A AST representa a estrutura lógica do programa sem manter todos os detalhes presentes no código-fonte original.
+A AST representa a estrutura lógica do programa sem preservar todos os detalhes da representação textual original.
 
-Os principais tipos de nós são:
+Os dois grupos principais são:
 
 ```text
 Expr
 Stmt
 ```
 
-`Expr` representa expressões, como:
+## Expressões (`Expr`)
 
-```ka
-10 + 20
-x > 5
-a * b
+Atualmente a AST possui expressões como:
+
+```text
+Assign
+Binary
+Call
+Function
+Get
+Grouping
+Literal
+Logical
+ObjectLiteral
+Set
+This
+Unary
+Variable
 ```
 
-Enquanto `Stmt` representa instruções, como:
+## Statements (`Stmt`)
 
-```ka
-var x = 10;
-print x;
+Os statements incluem:
+
+```text
+Block
+Expression
+Function
+If
+Print
+Return
+Switch
+Var
+While
 ```
 
-ou estruturas como:
+---
+
+# 5. Separação entre Token e AST
+
+Uma decisão importante da arquitetura atual é que a AST **não utiliza `Token` diretamente para representar nomes e operadores**.
+
+`Token` pertence à análise léxica.
+
+O Parser funciona como a fronteira entre a representação lexical e a representação sintática:
+
+```text
+Scanner
+   ↓
+ Token
+   ↓
+ Parser
+   ↓
+ ┌────────────────┐
+ │ Symbol         │
+ │ Operator       │
+ │ SourceLocation │
+ └────────────────┘
+   ↓
+  AST
+```
+
+Isso reduz o acoplamento entre o Scanner e a AST.
+
+---
+
+## Symbol
+
+`Symbol` representa nomes dentro da AST, como:
+
+- variáveis;
+- funções;
+- parâmetros;
+- propriedades;
+- `this`.
+
+Ele guarda atualmente:
+
+```text
+name
+line
+```
+
+Por exemplo:
 
 ```ka
-if (x > 5) {
-    print x;
+var resultado = 10;
+```
+
+o nome `resultado` pode ser representado na AST como:
+
+```text
+Symbol
+├── name = "resultado"
+└── line = 1
+```
+
+O Parser recebe um `Token` do Scanner e extrai apenas as informações necessárias para construir o `Symbol`.
+
+---
+
+## Operator
+
+Operadores utilizados pela AST são representados pela classe `Operator`.
+
+Ela possui um `Operator.Kind` específico para os operadores aceitos em expressões:
+
+```text
+PLUS
+MINUS
+STAR
+SLASH
+
+GREATER
+GREATER_EQUAL
+LESS
+LESS_EQUAL
+
+BANG_EQUAL
+EQUAL_EQUAL
+
+BANG
+
+AND
+OR
+```
+
+Essa separação evita utilizar `TokenType` diretamente na AST.
+
+`TokenType` representa todos os tokens da linguagem, incluindo elementos que não são operadores:
+
+```text
+VAR
+IF
+EOF
+LEFT_PAREN
+SWITCH
+...
+```
+
+Já `Operator.Kind` representa exclusivamente operadores válidos.
+
+---
+
+## SourceLocation
+
+`SourceLocation` representa uma localização no código-fonte sem exigir que a AST mantenha um `Token`.
+
+Na implementação atual, ela armazena:
+
+```text
+line
+```
+
+Essa abstração permite que futuramente sejam adicionadas informações como coluna e arquivo sem precisar acoplar novamente a AST ao Scanner.
+
+---
+
+# 6. Objetos
+
+A Ka possui suporte sintático a literais de objeto.
+
+Exemplo:
+
+```ka
+var pessoa = {
+    nome: "Ana",
+    idade: 20
+};
+```
+
+O Parser produz um:
+
+```text
+Expr.ObjectLiteral
+```
+
+O acesso a uma propriedade:
+
+```ka
+pessoa.nome;
+```
+
+é representado por:
+
+```text
+Expr.Get
+```
+
+Enquanto uma atribuição:
+
+```ka
+pessoa.idade = 21;
+```
+
+é representada por:
+
+```text
+Expr.Set
+```
+
+---
+
+# 7. Funções
+
+A Ka reconhece funções nomeadas:
+
+```ka
+fun soma(a, b) {
+    return a + b;
 }
 ```
 
----
+e chamadas:
 
-### Responsabilidade dos arquivos
-
-```text
-Ka.java
-    ↓
-Ponto de entrada da aplicação.
-
-Scanner.java
-    ↓
-Realiza a análise léxica do código-fonte.
-
-Token.java
-    ↓
-Representa individualmente cada token encontrado.
-
-TokenType.java
-    ↓
-Define os tipos de tokens existentes na linguagem.
-
-Parser.java
-    ↓
-Realiza a análise sintática dos tokens.
-
-Expr.java
-Stmt.java
-    ↓
-Definem os nós utilizados para representar a AST.
+```ka
+soma(10, 20);
 ```
 
+Também são reconhecidas funções anônimas:
+
+```ka
+var dobro = fun(x) {
+    return x * 2;
+};
+```
+
+O Parser diferencia uma declaração de função nomeada de uma função utilizada como expressão.
+
 ---
 
-## Como executar
+# 8. Estruturas de controle
 
-### Requisitos
+## If / Else
 
-É necessário possuir o Java instalado.
+```ka
+if (x > 10) {
+    print x;
+} else {
+    print 0;
+}
+```
+
+## While
+
+```ka
+while (x < 10) {
+    x = x + 1;
+}
+```
+
+## For
+
+A sintaxe da Ka reconhece `for`:
+
+```ka
+for (var i = 0; i < 3; i = i + 1) {
+    print i;
+}
+```
+
+Porém, não existe um `Stmt.For` na AST.
+
+O Parser realiza **desugaring**, transformando o `for` em construções já existentes.
+
+Conceitualmente:
+
+```ka
+{
+    var i = 0;
+
+    while (i < 3) {
+        print i;
+        i = i + 1;
+    }
+}
+```
+
+Assim, a sintaxe oferece `for` sem exigir uma representação exclusiva para ele na AST.
+
+---
+
+# 9. Switch / Case / Default
+
+A versão atual da Ka também adiciona suporte sintático a:
+
+```text
+switch
+case
+default
+```
+
+Exemplo:
+
+```ka
+switch (x) {
+    case 1:
+        print "um";
+
+    case 2:
+        print "dois";
+
+    default:
+        print "outro";
+}
+```
+
+A AST representa essa construção através de:
+
+```text
+Stmt.Switch
+```
+
+O nó armazena:
+
+- expressão analisada pelo `switch`;
+- valores dos `case`;
+- corpo de cada `case`;
+- corpo opcional de `default`.
+
+O Parser também detecta mais de um `default` dentro do mesmo `switch`.
+
+---
+
+# 10. Tratamento de erros
+
+O projeto diferencia **erros léxicos** de **erros sintáticos**.
+
+## Erro léxico
+
+Ocorre quando o Scanner encontra uma sequência que não consegue transformar em token válido.
+
+Exemplo:
+
+```ka
+@
+```
+
+Outro exemplo é uma string sem fechamento:
+
+```ka
+print "texto;
+```
+
+## Erro sintático
+
+Ocorre quando os tokens existem, mas estão organizados de maneira incompatível com a gramática.
+
+Exemplo:
+
+```ka
+var x = ;
+```
+
+O Parser também possui um mecanismo de sincronização para tentar continuar a análise depois de determinados erros sintáticos.
+
+---
+
+# 11. AstPrinter
+
+A versão atual inclui `AstPrinter.java`.
+
+Sua função é percorrer a AST e gerar uma representação textual no formato de **S-expression**.
+
+Isso permite visualizar concretamente o resultado produzido pelo Parser.
+
+Por exemplo:
+
+```ka
+var x = 10 + 5 * 2;
+```
+
+produz:
+
+```text
+(var x (+ 10 (* 5 2)))
+```
+
+Isso também permite visualizar a precedência.
+
+A expressão:
+
+```ka
+10 + 5 * 2
+```
+
+aparece como:
+
+```text
+(+ 10 (* 5 2))
+```
+
+mostrando que a multiplicação foi agrupada antes da soma.
+
+O `AstPrinter` é utilizado para visualização e depuração; ele não executa o programa.
+
+---
+
+# 12. Estrutura do projeto
+
+```text
+LinguagemKA-ProjetoCompiladores/
+│
+├── Ka/
+│   ├── ast/
+│   │   ├── Expr.java
+│   │   └── Stmt.java
+│   │
+│   ├── AstPrinter.java
+│   ├── Ka.java
+│   ├── Operator.java
+│   ├── Parser.java
+│   ├── Scanner.java
+│   ├── SourceLocation.java
+│   ├── Symbol.java
+│   ├── Token.java
+│   └── TokenType.java
+│
+├── tool/
+│   └── GenerateAst.java
+│
+├── teste.ka
+└── README.md
+```
+
+### Responsabilidade dos principais arquivos
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `Ka.java` | Ponto de entrada e integração Scanner → Parser → AstPrinter |
+| `Scanner.java` | Análise léxica |
+| `Token.java` | Representação de um token |
+| `TokenType.java` | Tipos de tokens da Ka |
+| `Parser.java` | Análise sintática |
+| `Expr.java` | Nós de expressão da AST |
+| `Stmt.java` | Nós de statements da AST |
+| `Symbol.java` | Representação de nomes na AST |
+| `Operator.java` | Representação restrita dos operadores da AST |
+| `SourceLocation.java` | Informação de localização no código-fonte |
+| `AstPrinter.java` | Impressão da AST |
+| `GenerateAst.java` | Utilitário para geração das classes da AST |
+
+---
+
+# 13. Como compilar
+
+## Requisitos
+
+É necessário possuir Java e `javac` instalados.
 
 Verifique com:
 
@@ -208,33 +735,59 @@ java --version
 javac --version
 ```
 
-Recomenda-se Java 11 ou superior.
+Na raiz do projeto, compile os arquivos com:
 
-### Compilação
-
-Clone o repositório:
-
-```bash
-git clone <URL-DO-REPOSITORIO>
-
-Compile os arquivos:
-
-```bash
-javac -d out $(find Ka -name "*.java")   # Windows PowerShell: javac -d out (Get-ChildItem -Recurse Ka -Filter *.java).FullName
-```
-
-Execute o programa:
+### Linux/macOS
 
 ```bash
 javac -d out $(find Ka -name "*.java")
-java -cp out ka.Ka teste.ka
+```
+
+### Windows PowerShell
+
+```powershell
+javac -d out (Get-ChildItem -Recurse Ka -Filter *.java).FullName
 ```
 
 ---
 
-## Exemplo para teste
+# 14. Como executar
 
-Um exemplo simples de entrada é:
+O repositório já possui o arquivo:
+
+```text
+teste.ka
+```
+
+Depois da compilação:
+
+```bash
+java -cp out ka.Ka teste.ka
+```
+
+Também é possível informar qualquer outro arquivo `.ka`:
+
+```bash
+java -cp out ka.Ka caminho/do/arquivo.ka
+```
+
+Sem informar um arquivo, o programa inicia o prompt interativo:
+
+```bash
+java -cp out ka.Ka
+```
+
+Exemplo:
+
+```text
+ka> var x = 10 + 5;
+```
+
+---
+
+# 15. Exemplo completo
+
+O arquivo `teste.ka` atual contém:
 
 ```ka
 var x = 10 + 5 * 2;
@@ -244,106 +797,147 @@ if (x > 10) {
 }
 ```
 
-### Etapa 1 — Scanner
+Execute:
 
-O Scanner identifica tokens equivalentes a:
-
-```text
-VAR
-IDENTIFIER
-EQUAL
-NUMBER
-PLUS
-NUMBER
-STAR
-NUMBER
-SEMICOLON
-
-IF
-LEFT_PAREN
-IDENTIFIER
-GREATER
-NUMBER
-RIGHT_PAREN
-LEFT_BRACE
-PRINT
-IDENTIFIER
-SEMICOLON
-RIGHT_BRACE
-
-EOF
+```bash
+java -cp out ka.Ka teste.ka
 ```
 
-### Etapa 2 — Parser
-
-O Parser utiliza esses tokens para reconhecer a estrutura do programa.
-
-De forma simplificada:
+O programa primeiro mostra os tokens reconhecidos:
 
 ```text
-Programa
-│
-├── Declaração de variável
-│   │
-│   ├── nome: x
-│   │
-│   └── valor
-│       └── +
-│           ├── 10
-│           └── *
-│               ├── 5
-│               └── 2
-│
-└── If
-    │
-    ├── condição
-    │   └── >
-    │       ├── x
-    │       └── 10
-    │
-    └── corpo
-        └── print x
+=== Tokens ===
+VAR var null
+IDENTIFIER x null
+EQUAL = null
+INT 10 10
+PLUS + null
+INT 5 5
+STAR * null
+INT 2 2
+SEMICOLON ; null
+...
+EOF  null
 ```
 
-Esse exemplo também demonstra que o Parser respeita a precedência dos operadores, reconhecendo:
+Em seguida, mostra a AST:
 
 ```text
-10 + (5 * 2)
+=== Parser ===
+(var x (+ 10 (* 5 2)))
+(if (> x 10) (block (print x)))
 ```
 
-em vez de:
+E, se não houver erros:
 
 ```text
-(10 + 5) * 2
+Analise sintatica concluida sem erros: 2 declaracao(oes).
 ```
 
 ---
 
-## Exemplo de erro sintático
+# 16. Exemplo para testar mais funcionalidades
 
-O Parser também é responsável por identificar estruturas que não seguem a gramática.
-
-Por exemplo:
+Crie um arquivo chamado `exemplo.ka`:
 
 ```ka
-var x = 10
-print x;
+var inteiro = 10;
+var decimal = 3.14;
+
+var pessoa = {
+    nome: "Ka",
+    idade: inteiro
+};
+
+fun soma(a, b) {
+    return a + b;
+}
+
+var dobro = fun(x) {
+    return x * 2;
+};
+
+if (inteiro > 5) {
+    print pessoa.nome;
+}
+
+switch (inteiro) {
+    case 5:
+        print "cinco";
+
+    case 10:
+        print "dez";
+
+    default:
+        print "outro";
+}
+
+for (var i = 0; i < 3; i = i + 1) {
+    print i;
+}
 ```
 
-A declaração da variável não possui `;`.
+Execute:
 
-Ao analisar os tokens, o Parser identifica que era esperado um `SEMICOLON` depois da expressão.
+```bash
+java -cp out ka.Ka exemplo.ka
+```
 
-O projeto possui ainda um mecanismo de **sincronização após erros sintáticos**, permitindo que o Parser tente continuar a análise do restante do código.
+O programa deverá realizar a análise léxica, construir a AST e imprimi-la.
 
-## Integrantes
+---
 
-| Nome completo                   | Login institucional |
-|---------------------------------|----------------------|
-| Camila Xavier de Medeiros       | cxm                  |
-| Juan                            | jlcm                 |
-| Mariana                         | mms-11               |
-| Rinaldo                         | rinaldosbj           |
-| Vinícius                        |                      |
+# 17. Escopo atual
 
+Esta versão implementa:
 
+```text
+Código-fonte
+      ↓
+Análise léxica
+      ↓
+Tokens
+      ↓
+Análise sintática
+      ↓
+AST
+      ↓
+Visualização da AST
+```
+
+O objetivo desta etapa é reconhecer e representar corretamente a estrutura do programa.
+
+O `AstPrinter` permite inspecionar essa estrutura, mas **não corresponde à execução da linguagem**.
+
+---
+
+# Integrantes
+
+| Nome completo | Login institucional |
+|---|---|
+| Camila Xavier de Medeiros | cxm |
+| Juan | jlcm |
+| Mariana | mms-11 |
+| Rinaldo | rsbj |
+| Vinícius | |
+
+---
+
+# Referência
+
+A implementação utiliza como referência conceitual e arquitetural:
+
+**Robert Nystrom — *Crafting Interpreters***
+
+A linguagem apresentada no livro é a **Lox**.
+
+A Ka utiliza conceitos dessa implementação como Scanner, Parser descendente recursivo, AST e padrão Visitor, mas estende e adapta essa base para as decisões do projeto.
+
+Entre as adaptações presentes na versão atual estão:
+
+- distinção léxica entre `INT` e `FLOAT`;
+- suporte a `switch`, `case` e `default`;
+- funções anônimas;
+- literais de objeto e acesso a propriedades;
+- estruturas próprias da AST como `Symbol`, `Operator` e `SourceLocation`;
+- impressão da AST através de `AstPrinter`.
