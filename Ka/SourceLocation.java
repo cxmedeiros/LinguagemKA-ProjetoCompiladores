@@ -1,11 +1,11 @@
-package com.craftinginterpreters.ka;
+package ka;
 
 /*
  * Hoje guarda so a linha. A ideia e evoluir pra incluir coluna e arquivo
  * sem refatorar a AST - mudar so esta classe basta, porque todos os nos
  * que a usam ganham os campos novos de graca.  
  */
-class SourceLocation {
+public class SourceLocation {
     final int line;
 
     SourceLocation(int line) {
@@ -20,4 +20,4 @@ class SourceLocation {
     public String toString() {
         return "linha " + line;
     }
-}
+}

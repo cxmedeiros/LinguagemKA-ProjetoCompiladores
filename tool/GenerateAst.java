@@ -1,4 +1,4 @@
-package com.craftinginterpreters.tool;
+package tool;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,7 +15,11 @@ import java.util.List;
  *                     (o ")" de uma chamada, a palavra "return")
  *
  * Uso (a partir da raiz do projeto):
- *   java tool/GenerateAst.java [diretorio de saida]   (padrao: Ka)
+ *   java tool/GenerateAst.java [diretorio de saida]
+ *   (padrao: Ka/ast)
+ *
+ * Expr e Stmt ficam no pacote ka.ast, separados do
+ * resto, porque sao gerados: nao se edita Expr.java/Stmt.java a mao.
  */
 public class GenerateAst {
     public static void main(String[] args) throws IOException {
@@ -23,7 +27,9 @@ public class GenerateAst {
             System.err.println("Uso: generate_ast [diretorio de saida]");
             System.exit(64);
         }
-        String outputDir = args.length == 1 ? args[0] : "Ka";
+        String outputDir = args.length == 1
+            ? args[0]
+            : "Ka/ast";
 
         defineAst(outputDir, "Expr", Arrays.asList(
             "Assign        : Symbol name, Expr value",
@@ -62,11 +68,15 @@ public class GenerateAst {
         String path = outputDir + "/" + baseName + ".java";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
-        writer.println("package com.craftinginterpreters.ka;");
+        writer.println("package ka.ast;");
         writer.println();
         writer.println("import java.util.List;");
         writer.println();
-        writer.println("abstract class " + baseName + " {");
+        writer.println("import ka.Operator;");
+        writer.println("import ka.SourceLocation;");
+        writer.println("import ka.Symbol;");
+        writer.println();
+        writer.println("public abstract class " + baseName + " {");
 
         defineVisitor(writer, baseName, types);
 
@@ -77,13 +87,13 @@ public class GenerateAst {
         }
 
         writer.println();
-        writer.println("  abstract <R> R accept(Visitor<R> visitor);");
+        writer.println("  public abstract <R> R accept(Visitor<R> visitor);");
         writer.println("}");
         writer.close();
     }
 
     private static void defineVisitor(PrintWriter writer, String baseName, List<String> types) {
-        writer.println("  interface Visitor<R> {");
+        writer.println("  public interface Visitor<R> {");
         for (String type : types) {
             String typeName = type.split(":")[0].trim();
             writer.println("    R visit" + typeName + baseName + "(" +
@@ -95,8 +105,8 @@ public class GenerateAst {
     private static void defineType(PrintWriter writer, String baseName,
                                     String className, String fieldList) {
         writer.println();
-        writer.println("  static class " + className + " extends " + baseName + " {");
-        writer.println("    " + className + "(" + fieldList + ") {");
+        writer.println("  public static class " + className + " extends " + baseName + " {");
+        writer.println("    public " + className + "(" + fieldList + ") {");
         String[] fields = fieldList.split(", ");
         for (String field : fields) {
             String name = field.split(" ")[1];
@@ -104,12 +114,12 @@ public class GenerateAst {
         }
         writer.println("    }");
         writer.println();
-        writer.println("    <R> R accept(Visitor<R> visitor) {");
+        writer.println("    public <R> R accept(Visitor<R> visitor) {");
         writer.println("      return visitor.visit" + className + baseName + "(this);");
         writer.println("    }");
         writer.println();
         for (String field : fields) {
-            writer.println("    final " + field + ";");
+            writer.println("    public final " + field + ";");
         }
         writer.println("  }");
     }

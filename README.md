@@ -20,7 +20,7 @@ Parser
 AST
 ```
 
-O objetivo, neste momento, não é executar o programa escrito em Ka, mas analisar sua estrutura léxica e sintática.
+O objetivo, neste momento é  analisar sua estrutura de forma léxica e sintática.
 
 ---
 
@@ -164,24 +164,6 @@ if (x > 5) {
 
 ---
 
-## Estrutura do projeto
-
-Os principais arquivos utilizados até esta etapa são:
-
-```text
-src/
-└── com/
-    └── craftinginterpreters/
-        └── lox/
-            ├── Ka.java
-            ├── Scanner.java
-            ├── Parser.java
-            ├── Expr.java
-            ├── Stmt.java
-            ├── Token.java
-            └── TokenType.java
-```
-
 ### Responsabilidade dos arquivos
 
 ```text
@@ -234,19 +216,18 @@ Clone o repositório:
 
 ```bash
 git clone <URL-DO-REPOSITORIO>
-cd Ka-language
-```
 
 Compile os arquivos:
 
 ```bash
-javac -d out src/com/craftinginterpreters/lox/*.java
+javac -d out $(find Ka -name "*.java")   # Windows PowerShell: javac -d out (Get-ChildItem -Recurse Ka -Filter *.java).FullName
 ```
 
 Execute o programa:
 
 ```bash
-java -cp out com.craftinginterpreters.lox.Ka
+javac -d out $(find Ka -name "*.java")
+java -cp out ka.Ka teste.ka
 ```
 
 ---
@@ -360,9 +341,9 @@ O projeto possui ainda um mecanismo de **sincronização após erros sintáticos
 | Nome completo                   | Login institucional |
 |---------------------------------|----------------------|
 | Camila Xavier de Medeiros       | cxm                  |
-| Juan                            |                      |
-| Mariana                         |                      |
-| Rinaldo                         |                      |
+| Juan                            | jlcm                 |
+| Mariana                         | mms-11               |
+| Rinaldo                         | rinaldosbj           |
 | Vinícius                        |                      |
 
 

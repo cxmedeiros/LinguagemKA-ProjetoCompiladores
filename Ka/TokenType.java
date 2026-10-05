@@ -1,4 +1,4 @@
-package com.craftinginterpreters.ka;
+package ka;
 
 enum TokenType {
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -17,4 +17,4 @@ enum TokenType {
 }
 //estender o livro para aproximar/melhorar a nossa linguagem consolidadas.
 //switch case,  dual. 
-//number -> int, float.
+//number -> int, float.
