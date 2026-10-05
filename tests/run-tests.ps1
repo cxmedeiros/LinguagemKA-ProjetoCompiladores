@@ -61,7 +61,7 @@ function Get-TokensSection([string]$stdout) {
 function Get-ParserSection([string]$stdout) {
     $lines = $stdout -split "`n"
     $index = [array]::IndexOf($lines, "=== Parser ===")
-    if ($index -lt 0) { return "" }
+    if ($index -lt 0 -or $index + 1 -ge $lines.Count) { return "" }
     return Normalize (($lines[($index + 1)..($lines.Count - 1)]) -join "`n")
 }
 

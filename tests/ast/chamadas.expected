@@ -1,0 +1,4 @@
+(expr (call f))
+(expr (call (. a b) 1 2))
+(expr (. (call (. obj metodo)) campo))
+Analise sintatica concluida sem erros: 3 declaracao(oes).
