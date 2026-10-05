@@ -1,4 +1,4 @@
-package com.craftinginterpreters.ka;
+package ka;
 
 /*
  * Operator representa um OPERADOR dentro da AST: o "+" de Expr.Binary,
@@ -27,7 +27,7 @@ package com.craftinginterpreters.ka;
  * engano, colocar um TokenType.VAR dentro de um Expr.Binary, porque o
  * compilador Java nem deixa compilar.
  */
-class Operator {
+public class Operator {
 
     // Os unicos operadores que aparecem em Expr.Binary, Expr.Logical
     // e Expr.Unary. Cada valor corresponde a exatamente um lexema.

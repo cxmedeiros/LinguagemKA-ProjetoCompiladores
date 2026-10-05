@@ -1,11 +1,11 @@
-package com.craftinginterpreters.ka;
+package ka;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.craftinginterpreters.ka.TokenType.*;
+import static ka.TokenType.*;
 
 class Scanner {
     private final String source;
@@ -166,7 +166,11 @@ class Scanner {
         if (isFloat) {
             addToken(FLOAT, Double.parseDouble(text));
         } else {
-            addToken(INT, Integer.parseInt(text));
+            try {
+                addToken(INT, Integer.parseInt(text));
+            } catch (NumberFormatException e) {
+                Ka.error(line, "Inteiro grande demais: " + text);
+            }
         }
     }
 
@@ -186,4 +190,4 @@ class Scanner {
         String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
     }
-}
+}
