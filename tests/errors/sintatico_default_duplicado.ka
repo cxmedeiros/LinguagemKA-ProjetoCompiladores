@@ -1,0 +1,6 @@
+switch (x) {
+    default:
+        print 1;
+    default:
+        print 2;
+}

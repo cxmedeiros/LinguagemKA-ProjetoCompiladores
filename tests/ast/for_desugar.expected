@@ -1,0 +1,3 @@
+(block (var i 0) (while (< i 3) (block (block (print i)) (expr (= i (+ i 1))))))
+(while true (print 1))
+Analise sintatica concluida sem erros: 2 declaracao(oes).

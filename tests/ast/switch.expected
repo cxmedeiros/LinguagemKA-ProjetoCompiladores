@@ -1,0 +1,4 @@
+(switch x (case 1 (print "um")) (case 2 (print "dois")) (default (print "outro")))
+(switch y)
+(switch z (default))
+Analise sintatica concluida sem erros: 3 declaracao(oes).

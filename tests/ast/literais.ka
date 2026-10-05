@@ -1,0 +1,7 @@
+var a = 10;
+var b = 10.5;
+var c = "texto";
+var d = true;
+var e = false;
+var f = nil;
+var g;

@@ -1,0 +1,12 @@
+fun soma(a, b) {
+    return a + b;
+}
+var dobro = fun(x) {
+    return x * 2;
+};
+soma(10, 20);
+fun nada() {
+    return;
+}
+dobro(1)(2);
+fun(x) { return x; };
