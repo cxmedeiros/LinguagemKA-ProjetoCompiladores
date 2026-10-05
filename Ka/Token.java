@@ -15,7 +15,8 @@ class Token {
         this.line = line;
     }
 
-    // apenas para debug na apresentação 
+    // Isso só serve pra quando a gente faz System.out.println(token),
+    // pra imprimir ele de um jeito legível, tipo: "PLUS + null"
     public String toString() {
         return type + " " + lexeme + " " + literal;
     }

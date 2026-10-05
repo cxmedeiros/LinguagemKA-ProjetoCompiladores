@@ -21,6 +21,8 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
         return out.toString();
     }
 
+    // ---------------- Stmt ----------------
+
     @Override
     public String visitBlockStmt(Stmt.Block stmt) {
         return parenthesize("block", stmt.statements);
@@ -79,6 +81,8 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     public String visitWhileStmt(Stmt.While stmt) {
         return parenthesizeWithStmts("while", stmt.condition, stmt.body);
     }
+
+    // ---------------- Expr ----------------
 
     @Override
     public String visitAssignExpr(Expr.Assign expr) {
