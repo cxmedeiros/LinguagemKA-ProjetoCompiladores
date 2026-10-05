@@ -1,0 +1,9 @@
+(var x (+ 10 (* 5 2)))
+(var y (* (group (+ 2 3)) 4))
+(var z (- (- 10 4) 3))
+(var w (* (- a) (! b)))
+(var r (or a (and b c)))
+(var s (!= (== a b) c))
+(var t (== (< 1 2) true))
+(var u (and (>= a 1) (<= b 2)))
+Analise sintatica concluida sem erros: 8 declaracao(oes).

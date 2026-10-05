@@ -1,0 +1,7 @@
+a = b = 3;
+var pessoa = { nome: "Ana", idade: 20 };
+var vazio = {};
+pessoa.nome;
+pessoa.idade = 21;
+a.b.c;
+print this.nome;

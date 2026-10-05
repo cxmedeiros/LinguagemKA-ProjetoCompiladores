@@ -1,0 +1,22 @@
+AND and null
+CASE case null
+DEFAULT default null
+ELSE else null
+FALSE false null
+FOR for null
+FUN fun null
+IF if null
+NIL nil null
+OR or null
+PRINT print null
+RETURN return null
+SWITCH switch null
+THIS this null
+TRUE true null
+VAR var null
+WHILE while null
+IDENTIFIER class null
+IDENTIFIER super null
+IDENTIFIER resultado null
+IDENTIFIER _x1 null
+EOF  null

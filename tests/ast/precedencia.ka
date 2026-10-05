@@ -1,0 +1,9 @@
+// precedencia e associatividade
+var x = 10 + 5 * 2;
+var y = (2 + 3) * 4;
+var z = 10 - 4 - 3;
+var w = -a * !b;
+var r = a or b and c;
+var s = a == b != c;
+var t = 1 < 2 == true;
+var u = a >= 1 and b <= 2;

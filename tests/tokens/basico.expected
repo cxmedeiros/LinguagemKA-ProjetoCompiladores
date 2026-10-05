@@ -1,0 +1,10 @@
+VAR var null
+IDENTIFIER x null
+EQUAL = null
+INT 10 10
+PLUS + null
+INT 5 5
+STAR * null
+INT 2 2
+SEMICOLON ; null
+EOF  null

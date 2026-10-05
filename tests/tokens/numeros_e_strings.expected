@@ -1,0 +1,6 @@
+INT 10 10
+FLOAT 10.5 10.5
+STRING "oi" oi
+INT 3 3
+DOT . null
+EOF  null

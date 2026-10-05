@@ -1,0 +1,8 @@
+(expr (= a (= b 3)))
+(var pessoa (object nome:"Ana" idade:20))
+(var vazio (object))
+(expr (. pessoa nome))
+(expr (.= pessoa idade 21))
+(expr (. (. a b) c))
+(print (. this nome))
+Analise sintatica concluida sem erros: 7 declaracao(oes).

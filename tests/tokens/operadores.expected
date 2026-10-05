@@ -1,0 +1,20 @@
+BANG ! null
+BANG_EQUAL != null
+EQUAL = null
+EQUAL_EQUAL == null
+LESS < null
+LESS_EQUAL <= null
+GREATER > null
+GREATER_EQUAL >= null
+SLASH / null
+MINUS - null
+PLUS + null
+STAR * null
+COLON : null
+COMMA , null
+DOT . null
+LEFT_PAREN ( null
+RIGHT_PAREN ) null
+LEFT_BRACE { null
+RIGHT_BRACE } null
+EOF  null

@@ -1,0 +1,13 @@
+if (x > 10) {
+    print x;
+} else {
+    print 0;
+}
+if (a) if (b) print 1; else print 2;
+while (x < 10) {
+    x = x + 1;
+}
+{
+    var a = 1;
+    print a;
+}

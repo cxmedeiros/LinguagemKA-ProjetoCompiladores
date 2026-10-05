@@ -1,0 +1,7 @@
+(fun soma (a b) (return (+ a b)))
+(var dobro (fun (x) (return (* x 2))))
+(expr (call soma 10 20))
+(fun nada () (return))
+(expr (call (call dobro 1) 2))
+(expr (fun (x) (return x)))
+Analise sintatica concluida sem erros: 6 declaracao(oes).

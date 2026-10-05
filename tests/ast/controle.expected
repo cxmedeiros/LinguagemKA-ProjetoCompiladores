@@ -1,0 +1,5 @@
+(if-else (> x 10) (block (print x)) (block (print 0)))
+(if a (if-else b (print 1) (print 2)))
+(while (< x 10) (block (expr (= x (+ x 1)))))
+(block (var a 1) (print a))
+Analise sintatica concluida sem erros: 4 declaracao(oes).
