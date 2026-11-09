@@ -13,6 +13,9 @@ class Scanner {
     private int start = 0;
     private int current = 0;
     private int line = 1;
+    private int startLine = 1;
+    private int startColumn = 1;
+    private int lineStart = 0;
 
     private static final Map<String, TokenType> keywords;
     static {
@@ -44,9 +47,14 @@ class Scanner {
     List<Token> scanTokens() {
         while (!isAtEnd()) {
             start = current;
+            startLine = line;
+            startColumn = source.codePointCount(lineStart, start) + 1;
             scanToken();
         }
-        tokens.add(new Token(EOF, "", null, line));
+        tokens.add(new Token(
+            EOF, "", null, line,
+            source.codePointCount(lineStart, current) + 1
+        ));
         return tokens;
     }
 
@@ -87,7 +95,6 @@ class Scanner {
             case '\t':
                 break;
             case '\n':
-                line++;
                 break;
 
             case '"': string(); break;
@@ -104,10 +111,19 @@ class Scanner {
         }
     }
 
+    
     private char advance() {
+        char c = source.charAt(current);
         current++;
-        return source.charAt(current - 1);
+
+        if (c == '\n') {
+            line++;
+            lineStart = current;
+        }
+
+        return c;
     }
+
 
     private char peek() {
         if (isAtEnd()) return '\0';
@@ -140,7 +156,6 @@ class Scanner {
 
     private void string() {
         while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') line++;
             advance();
         }
         if (isAtEnd()) {
@@ -182,12 +197,13 @@ class Scanner {
         addToken(type); 
     }
 
+    
     private void addToken(TokenType type) {
         addToken(type, null);
     }
 
     private void addToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
-        tokens.add(new Token(type, text, literal, line));
+        tokens.add(new Token(type, text, literal, startLine, startColumn));
     }
 }
