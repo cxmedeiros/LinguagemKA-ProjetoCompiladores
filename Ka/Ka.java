@@ -66,6 +66,10 @@ public class Ka {
         // Parou por erro sintatico: as mensagens ja foram impressas.
         if (hadError) return;
 
+        // 3) Analise semantica de escopo
+        new Resolver().resolve(statements);
+        if (hadError) return;
+
         System.out.println("=== Parser ===");
         System.out.print(new AstPrinter().print(statements));
         System.out.println("Analise sintatica concluida sem erros: "
@@ -84,6 +88,14 @@ public class Ka {
         } else {
             report(token.line, " em '" + token.lexeme + "'", message);
         }
+    }
+
+    // Erro semantico (Resolver). A localizacao pode ser null quando a AST
+    // nao a guarda (ex: bindings de padrao).
+    static void semanticError(SourceLocation location, String message) {
+        String where = location == null ? "" : " [" + location + "]";
+        System.err.println("Erro semantico" + where + ": " + message);
+        hadError = true;
     }
 
     private static void report(int line, String where, String message) {

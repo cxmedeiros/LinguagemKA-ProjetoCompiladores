@@ -4,5 +4,5 @@
 (expr (. pessoa nome))
 (expr (.= pessoa idade 21))
 (expr (. (. a b) c))
-(print (. this nome))
+(fun mostra () (print (. this nome)))
 Analise sintatica concluida sem erros: 7 declaracao(oes).
