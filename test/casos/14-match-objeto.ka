@@ -1,0 +1,13 @@
+// Teste de Pattern Matching com objetos
+
+var pessoa = { nome: "Camila", idade: 24 };
+
+print match (pessoa) {
+    case { nome: n } => n;
+    case _ => "desconhecido";
+};
+
+print match ({ idade: 20 }) {
+    case { nome: n } => n;
+    case _ => "sem nome";
+};

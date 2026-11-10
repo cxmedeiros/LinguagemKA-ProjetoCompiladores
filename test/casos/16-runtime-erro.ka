@@ -1,0 +1,3 @@
+// Teste de erro em tempo de execucao
+
+print 10 / "oi";
