@@ -1,0 +1,4 @@
+// "=", "==" e "=>" com e sem espacos
+a = b == c => d
+a=b==c=>d
+a = = > b

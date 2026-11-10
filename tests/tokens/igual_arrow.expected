@@ -1,0 +1,20 @@
+IDENTIFIER a null
+EQUAL = null
+IDENTIFIER b null
+EQUAL_EQUAL == null
+IDENTIFIER c null
+ARROW => null
+IDENTIFIER d null
+IDENTIFIER a null
+EQUAL = null
+IDENTIFIER b null
+EQUAL_EQUAL == null
+IDENTIFIER c null
+ARROW => null
+IDENTIFIER d null
+IDENTIFIER a null
+EQUAL = null
+EQUAL = null
+GREATER > null
+IDENTIFIER b null
+EOF  null
