@@ -44,7 +44,8 @@ public class GenerateAst {
             "Set           : Expr object, Symbol name, Expr value",
             "This          : Symbol keyword",
             "Unary         : Operator operator, Expr right",
-            "Variable      : Symbol name"
+            "Variable      : Symbol name",
+            "Match         : Expr scrutinee, List<MatchCase> cases"
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(
@@ -61,6 +62,25 @@ public class GenerateAst {
             "Var        : Symbol name, Expr initializer",
             "While      : Expr condition, Stmt body"
         ));
+
+        defineAst(outputDir, "Pattern", Arrays.asList(
+            "Literal       : Object value",
+            "Wildcard      : ",
+            "TypePattern   : String typeName, String binding",
+            "ObjectPattern : List<FieldPattern> fields"
+        ));
+
+        defineDataClass(
+            outputDir,
+            "MatchCase",
+            "Pattern pattern, Expr body"
+        );
+
+        defineDataClass(
+            outputDir,
+            "FieldPattern",
+            "String name, Pattern subPattern, String binding"
+        );
     }
 
     private static void defineAst(String outputDir, String baseName, List<String> types)
@@ -80,9 +100,12 @@ public class GenerateAst {
 
         defineVisitor(writer, baseName, types);
 
-        for (String type : types) {
-            String className = type.split(":")[0].trim();
-            String fields = type.split(":")[1].trim();
+       for (String type : types) {
+            String[] parts = type.split(":", 2);
+
+            String className = parts[0].trim();
+            String fields = parts[1].trim();
+
             defineType(writer, baseName, className, fields);
         }
 
@@ -107,7 +130,9 @@ public class GenerateAst {
         writer.println();
         writer.println("  public static class " + className + " extends " + baseName + " {");
         writer.println("    public " + className + "(" + fieldList + ") {");
-        String[] fields = fieldList.split(", ");
+        String[] fields = fieldList.isEmpty()
+            ? new String[0]
+            : fieldList.split(", ");
         for (String field : fields) {
             String name = field.split(" ")[1];
             writer.println("      this." + name + " = " + name + ";");
@@ -123,4 +148,38 @@ public class GenerateAst {
         }
         writer.println("  }");
     }
+    
+    private static void defineDataClass(
+            String outputDir,
+            String className,
+            String fieldList) throws IOException {
+
+        String path = outputDir + "/" + className + ".java";
+
+        try (PrintWriter writer = new PrintWriter(path, "UTF-8")) {
+            writer.println("package ka.ast;");
+            writer.println();
+            writer.println("public final class " + className + " {");
+
+            String[] fields = fieldList.split(", ");
+
+            writer.println("  public " + className +
+                        "(" + fieldList + ") {");
+
+            for (String field : fields) {
+                String name = field.substring(field.lastIndexOf(' ') + 1);
+                writer.println("    this." + name + " = " + name + ";");
+            }
+
+            writer.println("  }");
+            writer.println();
+
+            for (String field : fields) {
+                writer.println("  public final " + field + ";");
+            }
+
+            writer.println("}");
+        }
+    }
+
 }

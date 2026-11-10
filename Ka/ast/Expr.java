@@ -21,6 +21,7 @@ public abstract class Expr {
     R visitThisExpr(This expr);
     R visitUnaryExpr(Unary expr);
     R visitVariableExpr(Variable expr);
+    R visitMatchExpr(Match expr);
   }
 
   public static class Assign extends Expr {
@@ -203,6 +204,20 @@ public abstract class Expr {
     }
 
     public final Symbol name;
+  }
+
+  public static class Match extends Expr {
+    public Match(Expr scrutinee, List<MatchCase> cases) {
+      this.scrutinee = scrutinee;
+      this.cases = cases;
+    }
+
+    public <R> R accept(Visitor<R> visitor) {
+      return visitor.visitMatchExpr(this);
+    }
+
+    public final Expr scrutinee;
+    public final List<MatchCase> cases;
   }
 
   public abstract <R> R accept(Visitor<R> visitor);
