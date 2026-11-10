@@ -4,4 +4,4 @@ var vazio = {};
 pessoa.nome;
 pessoa.idade = 21;
 a.b.c;
-print this.nome;
+fun mostra() { print this.nome; }
