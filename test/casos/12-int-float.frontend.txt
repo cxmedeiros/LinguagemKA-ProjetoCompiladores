@@ -1,0 +1,30 @@
+=== Tokens ===
+PRINT print null
+INT 10 10
+SEMICOLON ; null
+PRINT print null
+FLOAT 10.5 10.5
+SEMICOLON ; null
+PRINT print null
+INT 2 2
+PLUS + null
+INT 3 3
+SEMICOLON ; null
+PRINT print null
+FLOAT 2.5 2.5
+PLUS + null
+FLOAT 3.5 3.5
+SEMICOLON ; null
+PRINT print null
+INT 10 10
+PLUS + null
+FLOAT 2.5 2.5
+SEMICOLON ; null
+EOF  null
+=== Parser ===
+(print 10)
+(print 10.5)
+(print (+ 2 3))
+(print (+ 2.5 3.5))
+(print (+ 10 2.5))
+Analise sintatica concluida sem erros: 5 declaracao(oes).

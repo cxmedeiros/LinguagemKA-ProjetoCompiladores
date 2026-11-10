@@ -1,0 +1,19 @@
+// Teste de Pattern Matching por tipo
+
+print match (42) {
+    case Number(n) => n;
+    case String(s) => s;
+    case nil => "nulo";
+};
+
+print match ("ola") {
+    case Number(n) => n;
+    case String(s) => s;
+    case nil => "nulo";
+};
+
+print match (nil) {
+    case Number(n) => n;
+    case String(s) => s;
+    case nil => "nulo";
+};

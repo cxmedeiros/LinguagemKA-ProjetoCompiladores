@@ -1,7 +1,7 @@
 package ka;
 
 import java.util.List;
-
+import ka.ast.MatchCase;
 import ka.ast.Expr;
 import ka.ast.Stmt;
 
@@ -160,6 +160,25 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     @Override
     public String visitVariableExpr(Expr.Variable expr) {
         return expr.name.toString();
+    }
+
+    @Override
+    public String visitMatchExpr(Expr.Match expr) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("(match ");
+        builder.append(expr.scrutinee.accept(this));
+
+        for (MatchCase matchCase : expr.cases) {
+            builder.append(" (case ");
+            builder.append(matchCase.pattern.getClass().getSimpleName());
+            builder.append(" => ");
+            builder.append(matchCase.body.accept(this));
+            builder.append(")");
+        }
+
+        builder.append(")");
+        return builder.toString();
     }
 
     // ---------------- auxiliares ----------------
