@@ -1,0 +1,19 @@
+MATCH match null
+LEFT_PAREN ( null
+IDENTIFIER x null
+RIGHT_PAREN ) null
+LEFT_BRACE { null
+CASE case null
+INT 1 1
+ARROW => null
+IDENTIFIER a null
+SEMICOLON ; null
+CASE case null
+UNDERSCORE _ null
+ARROW => null
+IDENTIFIER b null
+SEMICOLON ; null
+RIGHT_BRACE } null
+IDENTIFIER _x null
+IDENTIFIER x_ null
+EOF  null

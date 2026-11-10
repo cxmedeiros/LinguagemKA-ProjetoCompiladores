@@ -8,11 +8,12 @@ enum TokenType {
     EQUAL, EQUAL_EQUAL,
     GREATER, GREATER_EQUAL,
     LESS, LESS_EQUAL,
+    ARROW,
 
     IDENTIFIER, STRING, INT, FLOAT,
 
-    AND, CASE, DEFAULT, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
-    PRINT, RETURN, SWITCH, THIS, TRUE, VAR, WHILE,
+    AND, CASE, DEFAULT, ELSE, FALSE, FUN, FOR, IF, MATCH, NIL, OR,
+    PRINT, RETURN, SWITCH, THIS, TRUE, UNDERSCORE, VAR, WHILE,
     EOF
 }
 //estender o livro para aproximar/melhorar a nossa linguagem consolidadas.

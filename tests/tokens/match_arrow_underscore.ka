@@ -1,0 +1,2 @@
+// "_" sozinho e o curinga; "_x" e "x_" continuam identificadores
+match (x) { case 1 => a; case _ => b; } _x x_
