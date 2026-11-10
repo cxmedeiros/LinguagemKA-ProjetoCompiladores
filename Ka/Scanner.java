@@ -28,6 +28,7 @@ class Scanner {
         keywords.put("for",      FOR);
         keywords.put("fun",      FUN);
         keywords.put("if",       IF);
+        keywords.put("match",    MATCH);
         keywords.put("nil",      NIL);
         keywords.put("or",       OR);
         keywords.put("print",    PRINT);
@@ -37,6 +38,7 @@ class Scanner {
         keywords.put("true",     TRUE);
         keywords.put("var",      VAR);
         keywords.put("while",    WHILE);
+        keywords.put("_",        UNDERSCORE);
         // Nao existe "class" nem "super" - propositalmente.
     }
 
@@ -78,7 +80,11 @@ class Scanner {
             case ':': addToken(COLON); break;
 
             case '!': addToken(match('=') ? BANG_EQUAL : BANG); break;
-            case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;
+            case '=':
+                if (match('=')) addToken(EQUAL_EQUAL);
+                else if (match('>')) addToken(ARROW);
+                else addToken(EQUAL);
+                break;
             case '<': addToken(match('=') ? LESS_EQUAL : LESS); break;
             case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break;
 
