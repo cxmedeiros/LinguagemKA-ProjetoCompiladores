@@ -37,9 +37,10 @@ public abstract class Pattern {
   }
 
   public static class TypePattern extends Pattern {
-    public TypePattern(String typeName, String binding) {
+    public TypePattern(String typeName, String binding, SourceLocation location) {
       this.typeName = typeName;
       this.binding = binding;
+      this.location = location;
     }
 
     public <R> R accept(Visitor<R> visitor) {
@@ -48,6 +49,7 @@ public abstract class Pattern {
 
     public final String typeName;
     public final String binding;
+    public final SourceLocation location;
   }
 
   public static class ObjectPattern extends Pattern {

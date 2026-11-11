@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import ka.ast.Expr;
+import ka.ast.FieldPattern;
+import ka.ast.MatchCase;
+import ka.ast.Pattern;
 import ka.ast.Stmt;
 
 import static ka.TokenType.*;
@@ -453,6 +456,8 @@ class Parser {
             return new Expr.Function(parameters, body);
         }
 
+        if (match(MATCH)) return matchExpression();
+
         // Em posicao de expressao, "{" so pode ser um literal de objeto.
         if (match(LEFT_BRACE)) return objectLiteral();
 
@@ -476,6 +481,111 @@ class Parser {
 
         consume(RIGHT_BRACE, "Esperado '}' depois das propriedades do objeto.");
         return new Expr.ObjectLiteral(keys, values);
+    }
+
+    // ---------------------------------------------------------------
+    // Pattern matching
+    // ---------------------------------------------------------------
+
+    // matchExpr -> "match" "(" expression ")" "{" ( "case" pattern "=>" expression ";" )* "}"
+    // (o "match" ja foi consumido por primary())
+    private Expr matchExpression() {
+        SourceLocation location = new SourceLocation(previous());   // a palavra "match"
+        consume(LEFT_PAREN, "Esperado '(' depois de 'match'.");
+        Expr scrutinee = expression();
+        consume(RIGHT_PAREN, "Esperado ')' depois do valor do match.");
+        consume(LEFT_BRACE, "Esperado '{' antes dos cases do match.");
+
+        List<MatchCase> cases = new ArrayList<>();
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            consume(CASE, "Esperado 'case' dentro do match.");
+            Pattern pattern = pattern();
+            consume(ARROW, "Esperado '=>' depois do padrao.");
+            Expr body = expression();
+            consume(SEMICOLON, "Esperado ';' depois do corpo do case.");
+            cases.add(new MatchCase(pattern, body));
+        }
+
+        Token close = consume(RIGHT_BRACE, "Esperado '}' depois dos cases do match.");
+        if (cases.isEmpty()) {
+            error(close, "O match precisa de pelo menos um 'case'.");
+        }
+        return new Expr.Match(location, scrutinee, cases);
+    }
+
+    // Nomes de tipo aceitos em padroes como Number(n).
+    private static final List<String> TYPE_NAMES = Arrays.asList(
+        "Number", "Int", "Float", "String", "Boolean", "Nil", "Object", "Function");
+
+    // pattern -> "_"
+    //          | "nil" | "true" | "false" | INT | FLOAT | STRING | "-" (INT | FLOAT)
+    //          | IDENTIFIER ( "(" ( IDENTIFIER | "_" )? ")" )?     -- tipo, com binding opcional
+    //          | "{" ( fieldPattern ( "," fieldPattern )* )? "}"   -- objeto
+    private Pattern pattern() {
+        if (match(UNDERSCORE)) return new Pattern.Wildcard();
+
+        if (match(NIL)) return new Pattern.Literal(null);
+        if (match(TRUE)) return new Pattern.Literal(true);
+        if (match(FALSE)) return new Pattern.Literal(false);
+        if (match(INT, FLOAT, STRING)) return new Pattern.Literal(previous().literal);
+
+        // Numero negativo: -1, -2.5
+        if (check(MINUS) && (checkNext(INT) || checkNext(FLOAT))) {
+            advance();
+            Object number = advance().literal;
+            if (number instanceof Integer) return new Pattern.Literal(-(Integer) number);
+            return new Pattern.Literal(-(Double) number);
+        }
+
+        if (match(IDENTIFIER)) {
+            Token type = previous();
+            if (!TYPE_NAMES.contains(type.lexeme)) {
+                error(type, "Tipo desconhecido '" + type.lexeme + "' no padrao.");
+            }
+            String binding = null;
+            SourceLocation location = new SourceLocation(type);
+            if (match(LEFT_PAREN)) {
+                if (match(IDENTIFIER)) {
+                    binding = previous().lexeme;
+                    location = new SourceLocation(previous());
+                } else {
+                    match(UNDERSCORE);   // Number(_): sem binding
+                }
+                consume(RIGHT_PAREN, "Esperado ')' depois do nome do binding.");
+            }
+            return new Pattern.TypePattern(type.lexeme, binding, location);
+        }
+
+        if (match(LEFT_BRACE)) return objectPattern();
+
+        throw error(peek(), "Esperado um padrao.");
+    }
+
+    // fieldPattern -> IDENTIFIER                -- atalho: { nome }  = { nome: nome }
+    //               | IDENTIFIER ":" IDENTIFIER -- binding:  { nome: n }
+    //               | IDENTIFIER ":" pattern    -- subpadrao: { idade: 24 }, { x: Number(v) }
+    // (o "{" ja foi consumido)
+    private Pattern objectPattern() {
+        List<FieldPattern> fields = new ArrayList<>();
+
+        if (!check(RIGHT_BRACE)) {
+            do {
+                Token name = consume(IDENTIFIER, "Esperado o nome do campo no padrao.");
+                if (match(COLON)) {
+                    // IDENTIFIER sozinho e binding; IDENTIFIER seguido de "(" e padrao de tipo.
+                    if (check(IDENTIFIER) && !checkNext(LEFT_PAREN)) {
+                        fields.add(new FieldPattern(name.lexeme, null, advance().lexeme, new SourceLocation(name)));
+                    } else {
+                        fields.add(new FieldPattern(name.lexeme, pattern(), null, new SourceLocation(name)));
+                    }
+                } else {
+                    fields.add(new FieldPattern(name.lexeme, null, name.lexeme, new SourceLocation(name)));
+                }
+            } while (match(COMMA));
+        }
+
+        consume(RIGHT_BRACE, "Esperado '}' depois dos campos do padrao.");
+        return new Pattern.ObjectPattern(fields);
     }
 
     // ---------------------------------------------------------------

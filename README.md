@@ -941,3 +941,17 @@ Entre as adaptações presentes na versão atual estão:
 - literais de objeto e acesso a propriedades;
 - estruturas próprias da AST como `Symbol`, `Operator` e `SourceLocation`;
 - impressão da AST através de `AstPrinter`.
+
+## Como executar
+
+    javac -d out tool/GenerateAst.java Ka/*.java Ka/ast/*.java
+    java -cp out ka.Ka arquivo.ka            # executa o programa
+    java -cp out ka.Ka                       # REPL (as variaveis persistem entre linhas)
+    java -cp out ka.Ka --debug arquivo.ka    # so o front-end: tokens + arvore (nao executa)
+    java -cp out ka.Ka --trace               # REPL (ou arquivo) com tudo: tokens, arvore e
+                                             # passo a passo da execucao ([exec] ...)
+
+Codigos de saida: 0 ok, 64 uso incorreto, 65 erro lexico/sintatico/semantico, 70 erro de execucao.
+
+No `--trace`, cada valor aparece com o tipo (`10:int`, `10.0:float`) e cada operacao mostra
+o resultado, por exemplo `2:int + 5.2:float -> 7.2:float`.

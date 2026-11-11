@@ -32,7 +32,7 @@ function Normalize([string]$text) {
 function Invoke-Ka([string]$file) {
     $stdout = [System.IO.Path]::GetTempFileName()
     $stderr = [System.IO.Path]::GetTempFileName()
-    $javaArgs = "-cp `"$out`" ka.Ka `"$file`""
+    $javaArgs = "-cp `"$out`" ka.Ka --debug `"$file`""
     $proc = Start-Process -FilePath $java -ArgumentList $javaArgs -NoNewWindow -Wait -PassThru `
         -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     $result = [pscustomobject]@{
