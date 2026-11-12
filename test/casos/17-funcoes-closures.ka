@@ -1,0 +1,47 @@
+// Funcoes: recursao, closures, ordem superior, recursao mutua, escopo lexico
+fun fatorial(n) { if (n <= 1) return 1; return n * fatorial(n - 1); }
+print fatorial(10);
+fun fib(n) { if (n < 2) return n; return fib(n - 1) + fib(n - 2); }
+print fib(20);
+
+fun contador() {
+  var c = 0;
+  return fun() { c = c + 1; return c; };
+}
+var a = contador();
+var b = contador();
+a(); a();
+print a();
+print b();
+
+fun compor(f, g) { return fun(x) { return f(g(x)); }; }
+fun maisUm(x) { return x + 1; }
+fun dobro(x) { return x * 2; }
+print compor(maisUm, dobro)(5);
+print compor(dobro, maisUm)(5);
+
+fun aplicaN(f, n, x) {
+  while (n > 0) { x = f(x); n = n - 1; }
+  return x;
+}
+print aplicaN(dobro, 10, 1);
+
+fun ehPar(n) { if (n == 0) return true; return ehImpar(n - 1); }
+fun ehImpar(n) { if (n == 0) return false; return ehPar(n - 1); }
+print ehPar(10);
+print ehImpar(7);
+print ehPar(7);
+
+fun nada() { return; }
+print nada();
+fun semReturn() { var x = 1; }
+print semReturn();
+
+var x = "global";
+{
+  fun mostra() { print x; }
+  mostra();
+  var x = "local";
+  mostra();
+  print x;
+}

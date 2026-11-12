@@ -1,0 +1,2 @@
+print "nao executa";
+print this;

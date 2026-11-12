@@ -1,0 +1,2 @@
+print "antes";
+print match (1) { case String(s) => s; };

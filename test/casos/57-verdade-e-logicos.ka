@@ -1,0 +1,19 @@
+// Verdade: so nil e false sao falsos (0, "" e objetos sao verdadeiros). and/or devolvem
+// um dos operandos e fazem curto-circuito.
+if (nil) print "nil verdadeiro"; else print "nil falso";
+if (false) print "false verdadeiro"; else print "false falso";
+if (0) print "0 verdadeiro"; else print "0 falso";
+if ("") print "vazio verdadeiro"; else print "vazio falso";
+if ({}) print "objeto verdadeiro"; else print "objeto falso";
+print !nil;
+print !0;
+print nil or "padrao";
+print false or false;
+print 1 and 2;
+print nil and 2;
+print 0 or 5;
+fun boom() { print "avaliou"; return true; }
+print false and boom();
+print true or boom();
+print true and boom();
+print 1 < 2 and 2 < 3;

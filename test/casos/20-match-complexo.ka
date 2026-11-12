@@ -1,0 +1,61 @@
+// match: literais, tipos, objetos, subpadroes, aninhamento, closures, recursao
+fun descreve(v) {
+  return match (v) {
+    case 0 => "zero";
+    case -1 => "menos um";
+    case Int(i) => "int";
+    case Float(f) => "float";
+    case "oi" => "saudacao";
+    case String(s) => s + "!";
+    case true => "sim";
+    case false => "nao";
+    case nil => "nada";
+    case { tipo: "ponto", x: Number(a), y: Number(b) } => a + b;
+    case { nome } => "nome " + nome;
+    case Function => "funcao";
+    case Object(o) => "objeto";
+    case _ => "?";
+  };
+}
+print descreve(0);
+print descreve(-1);
+print descreve(7);
+print descreve(2.5);
+print descreve("oi");
+print descreve("abc");
+print descreve(true);
+print descreve(false);
+print descreve(nil);
+print descreve({ tipo: "ponto", x: 1, y: 2.5 });
+print descreve({ tipo: "ponto", x: 1, y: "a" });
+print descreve({ nome: "Ana" });
+print descreve(descreve);
+print descreve({});
+
+print match (3) { case Int(i) => i * 2; } + 1;
+var n = 100;
+print match (5) { case Number(n) => n; };
+print n;
+var base = { nome: "herdado" };
+print match (Object.create(base)) { case { nome: x } => x; };
+
+fun soma(l) {
+  return match (l) {
+    case { valor: v, prox: nil } => v;
+    case { valor: v, prox: p } => v + soma(p);
+    case nil => 0;
+  };
+}
+var lista = { valor: 1, prox: { valor: 2, prox: { valor: 3, prox: nil } } };
+print soma(lista);
+print soma(nil);
+
+fun faz(v) {
+  return match (v) {
+    case Number(k) => fun() { return k + 1; };
+    case _ => fun() { return 0; };
+  };
+}
+print faz(41)();
+print faz("x")();
+print match ({ a: { b: 5 } }) { case { a: { b: Int(z) } } => z * 10; };

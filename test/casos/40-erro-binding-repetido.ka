@@ -1,0 +1,2 @@
+print "nao executa";
+print match (1) { case { x: a, y: a } => a; };

@@ -955,3 +955,29 @@ Codigos de saida: 0 ok, 64 uso incorreto, 65 erro lexico/sintatico/semantico, 70
 
 No `--trace`, cada valor aparece com o tipo (`10:int`, `10.0:float`) e cada operacao mostra
 o resultado, por exemplo `2:int + 5.2:float -> 7.2:float`.
+
+## Testes
+
+    bash test/run-tests.sh        # compila e roda test/shelltest/*.t (precisa do shelltest)
+
+| Casos | O que cobrem |
+|---|---|
+| 12 | int/float basico |
+| 13, 14 | match (tipo, objeto) |
+| 15, 16 | erro semantico / erro de execucao |
+| 17 | funcoes: recursao, closures, ordem superior, recursao mutua, escopo lexico |
+| 18 | objetos: prototipos, `this`, `__proto__`, `set` nao muta o prototipo |
+| 19 | switch (sem fallthrough), for/while aninhados |
+| 20 | match complexo: literais, tipos, subpadroes, aninhado, closures, recursao |
+| 21 | promocao int/float (divisao inteira, Infinity, comparacoes mistas) |
+| 22 | igualdade numerica (`10 == 10.0`; decisao de design, ver o comentario no .ka) |
+| 23-39 | erros de execucao (exit 70) com linha e coluna |
+| 40-51 | erros lexicos/sintaticos/semanticos (exit 65; nada deve executar) |
+| 52 | impressao de funcoes e objetos |
+| 53 | REPL: variaveis persistem entre linhas e um erro nao derruba a sessao |
+| 54, 55, 56 | flags `--trace` e `--debug` |
+| 57 | verdade (so `nil`/`false` sao falsos) e curto-circuito de `and`/`or` |
+
+Notas sobre o formato do shelltest: a regex casa um trecho **dentro de uma linha**
+(`.` nao atravessa `\n`; para varias linhas use `[[:space:]]*`); uma linha de saida esperada
+nao pode comecar com `<`; a entrada padrao usa `<<<`.

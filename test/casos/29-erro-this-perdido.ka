@@ -1,0 +1,4 @@
+var o = { n: 1, f: fun() { return this.n; } };
+print o.f();
+var g = o.f;
+print g();
