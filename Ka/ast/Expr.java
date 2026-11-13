@@ -207,7 +207,8 @@ public abstract class Expr {
   }
 
   public static class Match extends Expr {
-    public Match(Expr scrutinee, List<MatchCase> cases) {
+    public Match(SourceLocation location, Expr scrutinee, List<MatchCase> cases) {
+      this.location = location;
       this.scrutinee = scrutinee;
       this.cases = cases;
     }
@@ -216,6 +217,7 @@ public abstract class Expr {
       return visitor.visitMatchExpr(this);
     }
 
+    public final SourceLocation location;
     public final Expr scrutinee;
     public final List<MatchCase> cases;
   }

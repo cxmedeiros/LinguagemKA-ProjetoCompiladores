@@ -1,0 +1,2 @@
+print Object.create(nil);
+Object.create(5);

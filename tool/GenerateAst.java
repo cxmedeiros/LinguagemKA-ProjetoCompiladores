@@ -45,7 +45,8 @@ public class GenerateAst {
             "This          : Symbol keyword",
             "Unary         : Operator operator, Expr right",
             "Variable      : Symbol name",
-            "Match         : Expr scrutinee, List<MatchCase> cases"
+            // location = a palavra "match" (onde reportar "nenhum caso casou")
+            "Match         : SourceLocation location, Expr scrutinee, List<MatchCase> cases"
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(
@@ -66,7 +67,8 @@ public class GenerateAst {
         defineAst(outputDir, "Pattern", Arrays.asList(
             "Literal       : Object value",
             "Wildcard      : ",
-            "TypePattern   : String typeName, String binding",
+            // location = o binding (ou o nome do tipo, se nao houver binding)
+            "TypePattern   : String typeName, String binding, SourceLocation location",
             "ObjectPattern : List<FieldPattern> fields"
         ));
 
@@ -79,7 +81,8 @@ public class GenerateAst {
         defineDataClass(
             outputDir,
             "FieldPattern",
-            "String name, Pattern subPattern, String binding"
+            // location = o nome do campo
+            "String name, Pattern subPattern, String binding, SourceLocation location"
         );
     }
 
@@ -158,6 +161,8 @@ public class GenerateAst {
 
         try (PrintWriter writer = new PrintWriter(path, "UTF-8")) {
             writer.println("package ka.ast;");
+            writer.println();
+            writer.println("import ka.SourceLocation;");
             writer.println();
             writer.println("public final class " + className + " {");
 

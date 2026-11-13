@@ -11,15 +11,37 @@ import java.util.List;
 import ka.ast.Stmt;
 
 public class Ka {
-    // Vira true quando o Scanner ou o Parser reporta qualquer erro.
+    // Vira true quando o Scanner, o Parser ou o Resolver reporta erro.
     static boolean hadError = false;
+    // Vira true quando o Interpreter aborta por erro de execucao.
+    static boolean hadRuntimeError = false;
+
+    // --debug: so o front-end (tokens + AST), sem executar o programa.
+    private static boolean debug = false;
+    // --trace: tokens + AST + EXECUCAO com o passo a passo do interpretador.
+    private static boolean trace = false;
+
+    // Instancia unica: no prompt (REPL) as variaveis globais sobrevivem entre linhas.
+    private static final Interpreter interpreter = new Interpreter();
 
     public static void main(String[] args) throws IOException {
-        if (args.length > 1) {
-            System.out.println("Uso: ka [arquivo]");
-            System.exit(64);
-        } else if (args.length == 1) {
-            runFile(args[0]);
+        String path = null;
+        for (String arg : args) {
+            if (arg.equals("--debug")) {
+                debug = true;
+            } else if (arg.equals("--trace")) {
+                trace = true;
+                interpreter.trace = true;
+            } else if (path == null) {
+                path = arg;
+            } else {
+                System.out.println("Uso: ka [--debug | --trace] [arquivo]");
+                System.exit(64);
+            }
+        }
+
+        if (path != null) {
+            runFile(path);
         } else {
             runPrompt();
         }
@@ -30,6 +52,7 @@ public class Ka {
         run(new String(bytes, StandardCharsets.UTF_8));
 
         if (hadError) System.exit(65);
+        if (hadRuntimeError) System.exit(70);
     }
 
     private static void runPrompt() throws IOException {
@@ -41,7 +64,8 @@ public class Ka {
             String line = reader.readLine();
             if (line == null) break;
             run(line);
-            hadError = false;   // um erro no prompt nao deve travar a sessao
+            hadError = false;           // um erro no prompt nao deve travar a sessao
+            hadRuntimeError = false;
         }
     }
 
@@ -50,9 +74,11 @@ public class Ka {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        System.out.println("=== Tokens ===");
-        for (Token token : tokens) {
-            System.out.println(token);
+        if (debug || trace) {
+            System.out.println("=== Tokens ===");
+            for (Token token : tokens) {
+                System.out.println(token);
+            }
         }
 
         // Se o Scanner achou erro, os tokens estao incompletos: parsear so
@@ -62,18 +88,24 @@ public class Ka {
         // 2) Analise sintatica
         Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
-
-        // Parou por erro sintatico: as mensagens ja foram impressas.
         if (hadError) return;
 
         // 3) Analise semantica de escopo
-        new Resolver().resolve(statements);
+        Resolver resolver = new Resolver();
+        resolver.resolve(statements);
         if (hadError) return;
 
-        System.out.println("=== Parser ===");
-        System.out.print(new AstPrinter().print(statements));
-        System.out.println("Analise sintatica concluida sem erros: "
-            + statements.size() + " declaracao(oes).");
+        if (debug || trace) {
+            System.out.println("=== Parser ===");
+            System.out.print(new AstPrinter().print(statements));
+            System.out.println("Analise sintatica concluida sem erros: "
+                + statements.size() + " declaracao(oes).");
+            if (debug) return;
+            System.out.println("=== Execucao ===");
+        }
+
+        // 4) Execucao
+        interpreter.interpret(statements, resolver.locals());
     }
 
     // Erro lexico (so se conhece a linha).
@@ -96,6 +128,13 @@ public class Ka {
         String where = location == null ? "" : " [" + location + "]";
         System.err.println("Erro semantico" + where + ": " + message);
         hadError = true;
+    }
+
+    // Erro de execucao (Interpreter). location pode ser null.
+    static void runtimeError(RuntimeError error) {
+        String where = error.location == null ? "" : " [" + error.location + "]";
+        System.err.println("Erro de runtime" + where + ": " + error.getMessage());
+        hadRuntimeError = true;
     }
 
     private static void report(int line, String where, String message) {

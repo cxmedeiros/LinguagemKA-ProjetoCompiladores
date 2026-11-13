@@ -1,0 +1,58 @@
+// Objetos prototipicos: heranca, this, __proto__, set nao muta o prototipo
+var animal = {
+  nome: "animal",
+  som: fun() { return "..."; },
+  apresenta: fun() { return this.nome + " faz " + this.som(); }
+};
+var cao = Object.create(animal);
+cao.nome = "Rex";
+cao.som = fun() { return "au"; };
+print cao.apresenta();
+print animal.apresenta();
+var gato = Object.create(animal);
+gato.nome = "Mia";
+print gato.apresenta();
+print cao.__proto__ == animal;
+print animal.__proto__;
+
+cao.extra = 1;
+print match (animal) { case { extra } => "tem"; case _ => "nao tem"; };
+print match (cao) { case { extra } => "tem"; case _ => "nao tem"; };
+
+var a = { x: 1 };
+var b = Object.create(a);
+var c = Object.create(b);
+print c.x;
+b.x = 2;
+print c.x;
+c.x = 3;
+print c.x;
+print b.x;
+print a.x;
+var d = Object.create(b);
+d.__proto__ = a;
+print d.x;
+d.__proto__ = nil;
+print d.__proto__;
+
+var ctr = { n: 0, inc: fun() { this.n = this.n + 1; return this; } };
+ctr.inc();
+ctr.inc();
+ctr.inc();
+print ctr.n;
+print ctr.inc().inc().n;
+print ctr == ctr;
+print { a: 1 } == { a: 1 };
+
+var base = { saudacao: fun() { return "ola, " + this.nome; } };
+var p1 = Object.create(base);
+p1.nome = "Ana";
+var p2 = Object.create(base);
+p2.nome = "Beto";
+print p1.saudacao();
+print p2.saudacao();
+var outro = { nome: "Caio", fala: base.saudacao };
+print outro.fala();
+
+var calc = { soma: fun(a, b) { return a + b; } };
+print calc.soma(2, 3.5);

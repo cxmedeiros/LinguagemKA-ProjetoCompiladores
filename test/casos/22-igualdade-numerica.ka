@@ -1,0 +1,13 @@
+// DECISAO DE DESIGN: numeros comparam por valor apos promocao (10 == 10.0 e true),
+// coerente com < e >=. Se o professor definir o contrario, ajuste isEqual no Interpreter
+// e os dois primeiros/ultimos resultados deste teste.
+print 10 == 10.0;
+print 10 != 10.0;
+print 1 == 2;
+print "a" == "a";
+print nil == nil;
+print nil == false;
+print 0 == false;
+print 3 == "3";
+switch (10.0) { case 10: print "casou int com float"; default: print "nao casou"; }
+print match (10.0) { case 10 => "literal casou"; case _ => "nao"; };

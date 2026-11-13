@@ -1,0 +1,3 @@
+print "antes";
+print x;
+print "depois";

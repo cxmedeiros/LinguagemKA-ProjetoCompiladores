@@ -1,0 +1,7 @@
+// Representacao textual de funcoes (do usuario, anonima, nativa) e objetos
+fun fatorial(n) { return n; }
+print fatorial;
+print fun() {};
+print clock;
+print {};
+print Object.create;

@@ -1,0 +1,1 @@
+print match (1) { case Int(i) => print i; };

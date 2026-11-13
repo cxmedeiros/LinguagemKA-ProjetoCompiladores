@@ -1,0 +1,2 @@
+fun f(x) { return match (x) { case Int(i) => i + 1; }; }
+print f(41);

@@ -1,0 +1,51 @@
+// switch (sem fallthrough, escopo por case), for/while aninhados, int/float em loops
+fun nomeDia(d) {
+  switch (d) {
+    case 1: return "domingo";
+    case 2: return "segunda";
+    case 3: return "terca";
+    default: return "outro";
+  }
+}
+print nomeDia(1);
+print nomeDia(3);
+print nomeDia(9);
+
+switch (2) {
+  case 1: print "um";
+  case 2: print "dois"; print "dois de novo";
+  case 3: print "tres";
+  default: print "default";
+}
+
+switch ("b") {
+  case "a": var t = "A"; print t;
+  case "b": var t = "B"; print t;
+}
+
+switch (99) { case 1: print "nunca"; }
+
+var soma = 0;
+for (var i = 1; i <= 100; i = i + 1) soma = soma + i;
+print soma;
+
+for (var i = 1; i <= 3; i = i + 1) {
+  for (var j = 1; j <= 3; j = j + 1) { print i * j; }
+}
+
+var s = 0;
+var k = 0;
+while (k < 4) { s = s + 0.5; k = k + 1; }
+print s;
+
+fun colatz(n) {
+  var passos = 0;
+  while (n != 1) {
+    if (n / 2 * 2 == n) n = n / 2; else n = 3 * n + 1;
+    passos = passos + 1;
+  }
+  return passos;
+}
+print colatz(27);
+
+switch (nomeDia(2)) { case "segunda": print "ok"; default: print "falhou"; }

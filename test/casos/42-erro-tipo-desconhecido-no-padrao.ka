@@ -1,0 +1,1 @@
+print match (1) { case Foo(x) => x; };

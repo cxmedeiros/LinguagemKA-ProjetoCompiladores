@@ -257,7 +257,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void>, Pattern.Visito
 
     @Override
     public Void visitTypePatternPattern(Pattern.TypePattern pattern) {
-        declareBinding(pattern.binding);
+        declareBinding(pattern.binding, pattern.location);
         return null;
     }
 
@@ -266,10 +266,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void>, Pattern.Visito
         Set<String> fieldNames = new HashSet<>();
         for (FieldPattern field : pattern.fields) {
             if (!fieldNames.add(field.name)) {
-                Ka.semanticError(null, "Campo '" + field.name + "' repetido no padrao de objeto.");
+                Ka.semanticError(field.location, "Campo '" + field.name + "' repetido no padrao de objeto.");
             }
             if (field.subPattern != null) resolve(field.subPattern);
-            declareBinding(field.binding);
+            declareBinding(field.binding, field.location);
         }
         return null;
     }
@@ -345,12 +345,11 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void>, Pattern.Visito
         scopes.peek().put(name, true);
     }
 
-    // Bindings de padrao nao tem localizacao propria (a AST guarda so a String).
-    private void declareBinding(String binding) {
+    private void declareBinding(String binding, SourceLocation location) {
         if (binding == null) return;
         Map<String, Boolean> scope = scopes.peek();
         if (scope.containsKey(binding)) {
-            Ka.semanticError(null, "Binding '" + binding + "' repetido no mesmo padrao.");
+            Ka.semanticError(location, "Binding '" + binding + "' repetido no mesmo padrao.");
         }
         scope.put(binding, true);
     }
