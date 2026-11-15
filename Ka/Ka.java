@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import ka.ast.Stmt;
+import ka.tac.TacBuilder;
+import ka.tac.TacProgram;
 
 public class Ka {
     // Vira true quando o Scanner, o Parser ou o Resolver reporta erro.
@@ -20,6 +22,8 @@ public class Ka {
     private static boolean debug = false;
     // --trace: tokens + AST + EXECUCAO com o passo a passo do interpretador.
     private static boolean trace = false;
+    // --tac: imprime a representacao intermediaria sem executar o programa.
+    private static boolean tac = false;
 
     // Instancia unica: no prompt (REPL) as variaveis globais sobrevivem entre linhas.
     private static final Interpreter interpreter = new Interpreter();
@@ -32,12 +36,19 @@ public class Ka {
             } else if (arg.equals("--trace")) {
                 trace = true;
                 interpreter.trace = true;
+            } else if (arg.equals("--tac")) {
+                tac = true;
             } else if (path == null) {
                 path = arg;
             } else {
                 System.out.println("Uso: ka [--debug | --trace] [arquivo]");
                 System.exit(64);
             }
+        }
+
+        if (tac && (debug || trace)) {
+            System.out.println("Uso: ka [--debug | --trace | --tac] [arquivo]");
+            System.exit(64);
         }
 
         if (path != null) {
@@ -60,7 +71,7 @@ public class Ka {
             new InputStreamReader(System.in, StandardCharsets.UTF_8));
 
         for (;;) {
-            System.out.print("ka> ");
+            if (!tac) System.out.print("ka> ");
             String line = reader.readLine();
             if (line == null) break;
             run(line);
@@ -94,6 +105,12 @@ public class Ka {
         Resolver resolver = new Resolver();
         resolver.resolve(statements);
         if (hadError) return;
+
+        if (tac) {
+            TacProgram program = new TacBuilder().build(statements, resolver.locals());
+            System.out.print(program);
+            return;
+        }
 
         if (debug || trace) {
             System.out.println("=== Parser ===");

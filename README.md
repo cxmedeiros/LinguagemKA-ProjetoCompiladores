@@ -685,6 +685,10 @@ LinguagemKA-ProjetoCompiladores/
 │   ├── ast/
 │   │   ├── Expr.java
 │   │   └── Stmt.java
+│   ├── tac/
+│   │   ├── Operand.java
+│   │   ├── TacBuilder.java
+│   │   └── TacProgram.java
 │   │
 │   ├── AstPrinter.java
 │   ├── Ka.java
@@ -707,7 +711,8 @@ LinguagemKA-ProjetoCompiladores/
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `Ka.java` | Ponto de entrada e integração Scanner → Parser → AstPrinter |
+| `Ka.java` | Ponto de entrada e integração do front-end, Interpreter e modo TAC |
+| `Ka/tac/` | Representação intermediária, gerador e validador de TAC |
 | `Scanner.java` | Análise léxica |
 | `Token.java` | Representação de um token |
 | `TokenType.java` | Tipos de tokens da Ka |
@@ -740,13 +745,13 @@ Na raiz do projeto, compile os arquivos com:
 ### Linux/macOS
 
 ```bash
-javac -d out $(find Ka -name "*.java")
+javac -d out tool/GenerateAst.java $(find Ka -name "*.java")
 ```
 
 ### Windows PowerShell
 
 ```powershell
-javac -d out (Get-ChildItem -Recurse Ka -Filter *.java).FullName
+javac -d out tool/GenerateAst.java (Get-ChildItem -Recurse Ka -Filter *.java).FullName
 ```
 
 ---
@@ -944,21 +949,28 @@ Entre as adaptações presentes na versão atual estão:
 
 ## Como executar
 
-    javac -d out tool/GenerateAst.java Ka/*.java Ka/ast/*.java
+    javac -d out tool/GenerateAst.java Ka/*.java Ka/ast/*.java Ka/tac/*.java
     java -cp out ka.Ka arquivo.ka            # executa o programa
     java -cp out ka.Ka                       # REPL (as variaveis persistem entre linhas)
     java -cp out ka.Ka --debug arquivo.ka    # so o front-end: tokens + arvore (nao executa)
     java -cp out ka.Ka --trace               # REPL (ou arquivo) com tudo: tokens, arvore e
                                              # passo a passo da execucao ([exec] ...)
+    java -cp out ka.Ka --tac arquivo.ka      # gera TAC sem executar o programa
+    java -cp out ka.Ka --tac                 # REPL TAC, sem prompts misturados na saida
 
 Codigos de saida: 0 ok, 64 uso incorreto, 65 erro lexico/sintatico/semantico, 70 erro de execucao.
+
+`--tac` executa scanner, parser e resolver, valida a IR e imprime uma instrucao por linha.
+Erros lexicos, sintaticos ou semanticos retornam 65 e deixam stdout vazio. O TAC cobre expressoes,
+fluxo de controle, funcoes/closures e `match`; operacoes dinamicas permanecem genericas.
 
 No `--trace`, cada valor aparece com o tipo (`10:int`, `10.0:float`) e cada operacao mostra
 o resultado, por exemplo `2:int + 5.2:float -> 7.2:float`.
 
 ## Testes
 
-    bash test/run-tests.sh        # compila e roda test/shelltest/*.t (precisa do shelltest)
+    bash test/run-tests.sh        # compila, roda testes TAC e test/shelltest/*.t (precisa do shelltest)
+    .\tests\run-tests.ps1        # testes TAC + tokens, AST e erros do front-end
 
 | Casos | O que cobrem |
 |---|---|

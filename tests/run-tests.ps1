@@ -17,12 +17,22 @@ if (-not $javac) {
 }
 $java = Join-Path (Split-Path -Parent $javac) "java.exe"
 
-$sources = (Get-ChildItem -Recurse (Join-Path $root "Ka") -Filter *.java).FullName
+$sources = @((Get-ChildItem -Recurse (Join-Path $root "Ka") -Filter *.java).FullName) +
+    @((Get-ChildItem (Join-Path $root "test\tac") -Filter *.java).FullName)
 & $javac -encoding UTF-8 -d $out $sources
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Falha na compilacao." -ForegroundColor Red
     exit 2
 }
+
+& $java -cp $out ka.tac.TacInfrastructureTest
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& $java -cp $out ka.TacBuilderTest
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& $java -cp $out ka.tac.TacCliTest
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& $java -cp $out ka.tac.TacCorpusTest
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 function Normalize([string]$text) {
     if (-not $text) { return "" }

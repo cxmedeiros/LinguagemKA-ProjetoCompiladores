@@ -1,6 +1,6 @@
 # Testes da Ka
 
-Suite de **testes funcionais** para o front-end da Ka (Scanner, Parser e AstPrinter).
+Suite de **testes funcionais** para o front-end da Ka (Scanner, Parser e AstPrinter), junto dos testes TAC.
 
 Não usa JUnit nem nenhuma biblioteca externa. Cada teste é um programa `.ka` com um arquivo `.expected` ao lado, que contém a saída que o compilador deve produzir. Um script compila o projeto, roda cada programa e compara o resultado com o esperado.
 
@@ -25,10 +25,11 @@ powershell -ExecutionPolicy Bypass -File .\tests\run-tests.ps1
 
 O script:
 
-1. compila `Ka/` em `out/`;
-2. executa `java -cp out ka.Ka <arquivo.ka>` para cada caso;
-3. compara a saída com o `.expected`;
-4. mostra `[OK]` ou `[FALHOU]` por caso (com esperado e obtido, em caso de falha) e um resumo no final.
+1. compila `Ka/` e `test/tac/` em `out/`;
+2. roda testes da IR, expressões, fluxo, funções, closures, padrões, CLI e REPL TAC;
+3. envia os 45 programas de `test/casos/` ao gerador e validador TAC;
+4. executa `ka.Ka --debug <arquivo.ka>` para cada caso de tokens, AST e erros;
+5. compara a saída com o `.expected` e mostra um resumo no final.
 
 Códigos de saída: `0` todos passaram, `1` algum teste falhou, `2` falha ao compilar ou JDK não encontrado.
 

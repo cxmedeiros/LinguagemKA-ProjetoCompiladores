@@ -24,6 +24,10 @@ public class Symbol {
         this(token.lexeme, new SourceLocation(token));
     }
 
+    public String name() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return name;
