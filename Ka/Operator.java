@@ -77,6 +77,31 @@ public class Operator {
         }
     }
 
+    public SourceLocation location() {
+        return location;
+    }
+
+    // Inverso de lexeme(): o TacInterpreter recebe o operador como texto na instrucao TAC.
+    static Kind kindOfLexeme(String lexeme) {
+        switch (lexeme) {
+            case "+":   return Kind.PLUS;
+            case "-":   return Kind.MINUS;
+            case "*":   return Kind.STAR;
+            case "/":   return Kind.SLASH;
+            case ">":   return Kind.GREATER;
+            case ">=":  return Kind.GREATER_EQUAL;
+            case "<":   return Kind.LESS;
+            case "<=":  return Kind.LESS_EQUAL;
+            case "!=":  return Kind.BANG_EQUAL;
+            case "==":  return Kind.EQUAL_EQUAL;
+            case "!":   return Kind.BANG;
+            case "and": return Kind.AND;
+            case "or":  return Kind.OR;
+            default:
+                throw new IllegalArgumentException("Operador desconhecido: " + lexeme);
+        }
+    }
+
     // Reconstroi o texto do operador a partir do Kind - usado em
     // mensagens de erro e em qualquer impressao da AST, sem precisar
     // guardar o lexeme original.

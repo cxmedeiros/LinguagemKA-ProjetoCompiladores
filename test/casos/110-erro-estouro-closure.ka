@@ -1,0 +1,1 @@
+var g = nil; g = fun(n) { return g(n + 1); }; print "antes"; g(0);

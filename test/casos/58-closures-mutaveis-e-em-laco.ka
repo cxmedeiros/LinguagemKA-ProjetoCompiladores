@@ -1,0 +1,43 @@
+fun contador() { var c = 0; return fun() { c = c + 1; return c; }; }
+var a = contador(); var b = contador();
+print a(); print a(); print b(); print a();
+fun par() {
+  var n = 0;
+  var inc = fun() { n = n + 1; return n; };
+  var get = fun() { return n; };
+  return { inc: inc, get: get };
+}
+var p = par(); p.inc(); p.inc(); print p.get();
+fun tres() {
+  var x = 1;
+  fun f() { fun g() { fun h() { x = x * 2; return x; } return h; } return g(); }
+  return f();
+}
+var h = tres(); print h(); print h(); print h();
+// closures em laco: bloco do corpo cria variavel NOVA por iteracao
+var fs = {}; var i = 0;
+while (i < 4) {
+  var v = i * 100;
+  if (i == 0) fs.a = fun() { v = v + 1; return v; };
+  if (i == 1) fs.b = fun() { v = v + 1; return v; };
+  if (i == 3) fs.d = fun() { return v; };
+  i = i + 1;
+}
+print fs.a(); print fs.a(); print fs.b(); print fs.d();
+// for: a variavel do for e UMA so, compartilhada
+var g0 = nil; var g1 = nil;
+for (var k = 0; k < 3; k = k + 1) { if (k == 0) g0 = fun() { return k; }; if (k == 1) g1 = fun() { return k; }; }
+print g0(); print g1();
+// parametro capturado e mutado
+fun soma(n) { return fun(m) { n = n + m; return n; }; }
+var s = soma(10); print s(1); print s(2); print soma(100)(5);
+// closure sobre variavel de bloco no nivel global
+var gl = nil;
+{ var x = 10; gl = fun() { x = x + 1; return x; }; }
+print gl(); print gl();
+// IIFE e funcao anonima passada
+print fun(x) { return x * 3; }(4);
+fun aplica(f, v) { return f(f(v)); }
+print aplica(fun(z) { return z + 1; }, 5);
+fun compoe(f, g) { return fun(x) { return f(g(x)); }; }
+print compoe(fun(x) { return x * 2; }, fun(x) { return x + 1; })(5);

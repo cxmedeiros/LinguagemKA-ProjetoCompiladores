@@ -1,0 +1,17 @@
+fun efeito(n) { print n; return n; }
+switch (2) { case efeito(1): print "a"; case efeito(2): print "b"; case efeito(3): print "c"; default: print "d"; }
+switch (9) { case 1: print "a"; default: print "d"; }
+switch (1.0) { case 1: print "int casa float"; }
+fun f(x) { switch (x) { case 1: return "um"; case 2: { return "dois"; } default: return "mais"; } }
+print f(1); print f(2); print f(3);
+var fs = nil;
+switch (1) { case 1: var t = "T"; fs = fun() { return t; }; t = "T2"; }
+print fs();
+switch ("a") { case "a": switch ("b") { case "b": print "aninhado"; default: print "x"; } }
+var i = 0;
+while (i < 3) { switch (i) { case 0: print "zero"; case 1: var q = i * 5; print q; default: print "dflt"; } i = i + 1; }
+switch (nil) { case nil: print "nil"; }
+switch (true) { case false: print "f"; case true: print "t"; }
+var r = 0;
+switch (r) { case 0: r = r + 1; print r; }
+print r;

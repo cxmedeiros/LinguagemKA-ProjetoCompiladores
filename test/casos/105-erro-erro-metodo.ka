@@ -1,0 +1,1 @@
+var o = { m: fun() { return this.faltando; } }; print "antes"; o.m();

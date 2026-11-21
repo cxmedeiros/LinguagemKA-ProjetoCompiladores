@@ -1,0 +1,1 @@
+var o = { v: 1, g: fun() { return this.v; } }; var f = o.g; print "antes"; print f();

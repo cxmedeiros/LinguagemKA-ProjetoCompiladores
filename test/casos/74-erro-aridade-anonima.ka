@@ -1,0 +1,1 @@
+print "antes"; (fun(a) { return a; })(1, 2);

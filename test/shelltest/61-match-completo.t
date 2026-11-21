@@ -1,0 +1,32 @@
+java -cp out ka.Ka test/casos/61-match-completo.ka
+>>>
+int
+float
+str
+bool
+nil
+fn
+obj
+fn
+3.5
+4
+9
+0
+6
+global
+20
+10
+1
+2
+tres
+42
+2
+um-int
+nada
+neg
+a1
+3
+21
+6
+>>>2
+>>>= 0

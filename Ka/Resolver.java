@@ -16,24 +16,25 @@ import ka.ast.Pattern;
 import ka.ast.Stmt;
 
 /*
- * Analise semantica de escopo, executada entre o Parser e o Interpreter.
+ * Analise semantica de escopo, executada entre o Parser e o TacBuilder.
  *
  * Duas responsabilidades:
  *  1) Calcular, para cada Variable/Assign/This local, a DISTANCIA (numero de
  *     escopos a subir) ate onde o nome foi declarado. Quem nao e resolvido
- *     aqui e global. O resultado fica em locals() para o Interpreter.
+ *     aqui e global. O resultado fica em locals() para o TacBuilder, que transforma cada
+ *     distancia no nome unico da declaracao (x$1, x$2...) ou em upvalue.
  *  2) Reportar erros estaticos: return fora de funcao, 'this' fora de
  *     funcao, leitura de variavel no proprio inicializador e nomes
  *     repetidos no mesmo escopo.
  *
- * CONTRATO COM O INTERPRETER (os escopos criados aqui precisam ser os mesmos
- * em tempo de execucao, senao as distancias ficam erradas):
- *   - Block: um Environment novo.
- *   - Funcao (Stmt.Function / Expr.Function): UM Environment por chamada
+ * CONTRATO COM O TACBUILDER (os escopos criados aqui precisam ser os mesmos
+ * que ele recria ao percorrer a AST, senao as distancias ficam erradas):
+ *   - Block: um escopo novo.
+ *   - Funcao (Stmt.Function / Expr.Function): UM escopo por chamada
  *     contendo "this" (nil se a funcao nao foi vinculada a um objeto) e os
  *     parametros; o corpo executa direto nele, sem Block extra.
- *   - Switch: cada case e o default executam em um Environment proprio.
- *   - Match: cada case executa em um Environment proprio contendo os
+ *   - Switch: cada case e o default executam em um escopo proprio.
+ *   - Match: cada case executa em um escopo proprio contendo os
  *     bindings do padrao.
  * Break/continue nao existem na Ka, entao nao ha o que verificar.
  */

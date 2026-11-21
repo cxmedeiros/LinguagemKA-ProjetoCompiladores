@@ -7,7 +7,7 @@ import java.util.Map;
  * Modelo prototipico: so existe OBJETO = campos + ponteiro para o
  * prototipo. Se o objeto nao tem o campo, a busca sobe pela cadeia.
  * Metodos sao campos cujo valor e uma funcao; o 'this' e vinculado pelo
- * Interpreter na hora da chamada (visitCallExpr).
+ * TacInterpreter na hora da chamada (instrucao CALL).
  */
 class KaObject {
     KaObject prototype;

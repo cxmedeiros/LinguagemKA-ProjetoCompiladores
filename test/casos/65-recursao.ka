@@ -1,0 +1,25 @@
+fun fib(n) { if (n < 2) return n; return fib(n - 1) + fib(n - 2); }
+print fib(20);
+fun fat(n) { if (n <= 1) return 1; return n * fat(n - 1); }
+print fat(12);
+fun par(n) { if (n == 0) return true; return impar(n - 1); }
+fun impar(n) { if (n == 0) return false; return par(n - 1); }
+print par(100); print impar(7);
+fun ack(m, n) { if (m == 0) return n + 1; if (n == 0) return ack(m - 1, 1); return ack(m - 1, ack(m, n - 1)); }
+print ack(2, 3);
+fun soma(n) { if (n == 0) return 0; return n + soma(n - 1); }
+print soma(500);
+fun mapa(l, f) { if (l == nil) return nil; return { h: f(l.h), t: mapa(l.t, f) }; }
+fun imp(l) { if (l == nil) return 0; print l.h; return imp(l.t); }
+imp(mapa({ h: 1, t: { h: 2, t: { h: 3, t: nil } } }, fun(x) { return x * x; }));
+fun hanoi(n, a, b, c) { if (n == 0) return 0; return hanoi(n - 1, a, c, b) + 1 + hanoi(n - 1, c, b, a); }
+print hanoi(10, "a", "b", "c");
+fun gcd(a, b) { if (b == 0) return a; return gcd(b, a - a / b * b); }
+print gcd(48, 18);
+var memo = {};
+fun cnt(n) { var s = 0; var i = 0; while (i < n) { s = s + i; i = i + 1; } return s; }
+print cnt(1000);
+fun semRetorno() { var x = 1; }
+print semRetorno();
+fun retornoVazio() { return; }
+print retornoVazio();

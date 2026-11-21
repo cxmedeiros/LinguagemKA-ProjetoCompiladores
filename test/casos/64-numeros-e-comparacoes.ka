@@ -1,0 +1,13 @@
+print 1 + 2; print 1 + 2.0; print 7 / 2; print -7 / 2; print 7 / 2.0; print 7.0 / 2; print 0 / 5;
+print 2147483647; print 2147483646 + 1; print -2147483647 - 1;
+print 10 == 10.0; print 10 != 10.0; print 1 < 1.5; print 2.5 >= 2; print 3 <= 3.0;
+print "a" + "b"; print "a" == "a"; print "a" != "b"; print true == true; print nil == nil; print nil == false;
+print 1 / 3.0; print 2.0 * 3; print 0.1 + 0.2; print 1.0; print 100.0 / 3;
+print 5.0 / 0; print -5.0 / 0; print 0.0 / 0 == 0.0 / 0;
+print -3; print -3.5; print - -4; print !true;
+print 1 == "1"; print 0 == false; print "" == nil;
+var a = 10; var b = 3;
+print a / b; print a * b - a / b; print (a + b) * (a - b);
+print 1.5 + 1.5; print 3 * 0.5; print 10 - 0.5;
+fun avg(x, y) { return (x + y) / 2; }
+print avg(3, 4); print avg(3.0, 4);

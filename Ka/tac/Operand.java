@@ -8,6 +8,7 @@ public final class Operand {
 
     private final Kind kind;
     private final Object value;
+    private ka.SourceLocation location; // so para leituras de globais; fora de equals/hashCode
 
     private Operand(Kind kind, Object value) {
         this.kind = kind;
@@ -45,6 +46,15 @@ public final class Operand {
         return new Operand(Kind.UPVALUE, "u" + index);
     }
 
+    /** Copia deste operando carregando a posicao no codigo-fonte (para "Variavel indefinida"). */
+    public Operand at(ka.SourceLocation where) {
+        if (where == null) return this;
+        Operand copy = new Operand(kind, value);
+        copy.location = where;
+        return copy;
+    }
+
+    public ka.SourceLocation location() { return location; }
     public Kind kind() { return kind; }
     public Object value() { return value; }
 

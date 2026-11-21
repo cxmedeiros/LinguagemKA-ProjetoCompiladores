@@ -1,0 +1,1 @@
+print match (3) { case Int(i) => i + "a"; };

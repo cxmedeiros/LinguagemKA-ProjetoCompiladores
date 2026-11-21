@@ -1,0 +1,8 @@
+var o = Object.create(nil);
+print o.__proto__;
+var p = Object.create({ z: 1 });
+print p.z;
+var q = Object.create(Object.create(Object.create({ deep: "ok" })));
+print q.deep;
+print Object.create({}).__proto__ == nil;
+print clock() - clock() <= 0;

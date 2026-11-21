@@ -1,0 +1,1 @@
+var o = { m: fun(a) { return a; } }; print "antes"; o.m();

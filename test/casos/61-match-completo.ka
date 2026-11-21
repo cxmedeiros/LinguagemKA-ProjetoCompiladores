@@ -1,0 +1,48 @@
+fun tipo(v) {
+  return match (v) {
+    case Int(i) => "int";
+    case Float(f) => "float";
+    case String(s) => "str";
+    case Boolean(b) => "bool";
+    case Nil => "nil";
+    case Function => "fn";
+    case Object => "obj";
+    case _ => "?";
+  };
+}
+print tipo(1); print tipo(1.5); print tipo("a"); print tipo(true); print tipo(nil);
+print tipo(tipo); print tipo({}); print tipo(clock);
+fun f(v) {
+  return match (v) {
+    case { a: { b: Int(x), c: String(s) }, d: Number(n) } => x + n;
+    case { a: { b: Int(x) } } => x;
+    case { a } => a;
+    case _ => 0;
+  };
+}
+print f({ a: { b: 1, c: "z" }, d: 2.5 });
+print f({ a: { b: 4 } }); print f({ a: 9 }); print f(3);
+var x = "global";
+print match (5) { case Int(x) => x + 1; };
+print x;
+var lst = {};
+var i = 0;
+while (i < 3) {
+  lst.v = match (i) { case Int(k) => fun() { return k * 10; }; };
+  if (i == 1) lst.keep = lst.v;
+  i = i + 1;
+}
+print lst.v(); print lst.keep();
+fun efeito(n) { print n; return n; }
+print match (efeito(1) + efeito(2)) { case 3 => "tres"; case _ => "outro"; };
+var o = { m: fun() { return match (this) { case { k: Int(v) } => v * 2; case _ => -1; }; }, k: 21 };
+print o.m();
+print match ("oi") { case "ola" => 1; case "oi" => 2; };
+print match (1.0) { case 1 => "um-int"; case Float(f) => "float"; };
+print match (nil) { case nil => "nada"; };
+print match (-3) { case -3 => "neg"; };
+print match ({ a: 1 }) { case { a: 1 } => "a1"; case { a: Int(q) } => "outro"; };
+print match ({ a: 1, b: 2 }) { case { a, b } => a + b; };
+print match (true) { case true => 1; case _ => 2; } + match (false) { case true => 10; case _ => 20; };
+fun fatia(l) { return match (l) { case { h: Int(h), t: nil } => h; case { h: Int(h), t } => h + fatia(t); case nil => 0; }; }
+print fatia({ h: 1, t: { h: 2, t: { h: 3, t: nil } } });

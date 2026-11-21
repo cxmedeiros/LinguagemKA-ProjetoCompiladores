@@ -15,18 +15,18 @@ import ka.tac.TacProgram;
 public class Ka {
     // Vira true quando o Scanner, o Parser ou o Resolver reporta erro.
     static boolean hadError = false;
-    // Vira true quando o Interpreter aborta por erro de execucao.
+    // Vira true quando o TacInterpreter aborta por erro de execucao.
     static boolean hadRuntimeError = false;
 
     // --debug: so o front-end (tokens + AST), sem executar o programa.
     private static boolean debug = false;
-    // --trace: tokens + AST + EXECUCAO com o passo a passo do interpretador.
+    // --trace: tokens + AST + TAC + EXECUCAO com o passo a passo do TacInterpreter.
     private static boolean trace = false;
     // --tac: imprime a representacao intermediaria sem executar o programa.
     private static boolean tac = false;
 
     // Instancia unica: no prompt (REPL) as variaveis globais sobrevivem entre linhas.
-    private static final Interpreter interpreter = new Interpreter();
+    private static final TacInterpreter interpreter = new TacInterpreter();
 
     public static void main(String[] args) throws IOException {
         String path = null;
@@ -107,8 +107,7 @@ public class Ka {
         if (hadError) return;
 
         if (tac) {
-            TacProgram program = new TacBuilder().build(statements, resolver.locals());
-            System.out.print(program);
+            System.out.print(new TacBuilder().build(statements, resolver.locals()));
             return;
         }
 
@@ -118,11 +117,18 @@ public class Ka {
             System.out.println("Analise sintatica concluida sem erros: "
                 + statements.size() + " declaracao(oes).");
             if (debug) return;
+        }
+
+        // 4) Geracao do codigo de tres enderecos (TAC)
+        TacProgram program = new TacBuilder().build(statements, resolver.locals());
+        if (trace) {
+            System.out.println("=== TAC ===");
+            System.out.print(program);
             System.out.println("=== Execucao ===");
         }
 
-        // 4) Execucao
-        interpreter.interpret(statements, resolver.locals());
+        // 5) Execucao do TAC
+        interpreter.run(program);
     }
 
     // Erro lexico (so se conhece a linha).
@@ -147,7 +153,7 @@ public class Ka {
         hadError = true;
     }
 
-    // Erro de execucao (Interpreter). location pode ser null.
+    // Erro de execucao (TacInterpreter). location pode ser null.
     static void runtimeError(RuntimeError error) {
         String where = error.location == null ? "" : " [" + error.location + "]";
         System.err.println("Erro de runtime" + where + ": " + error.getMessage());

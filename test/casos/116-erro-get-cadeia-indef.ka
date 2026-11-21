@@ -1,0 +1,1 @@
+var o = { a: {} }; print "antes"; print o.a.b.c;

@@ -87,9 +87,12 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
 
     private Operand temporary() { return Operand.temporary(++temporaryNumber); }
     private Operand label() { return Operand.label("L" + (++labelNumber)); }
-    private void emit(TacInstruction instruction) { activeInstructions.add(instruction); }
-    private void move(Operand destination, Operand source) {
-        emit(TacInstruction.of(Op.MOVE, destination, null, source));
+    private TacInstruction emit(TacInstruction instruction) {
+        activeInstructions.add(instruction);
+        return instruction;
+    }
+    private TacInstruction move(Operand destination, Operand source) {
+        return emit(TacInstruction.of(Op.MOVE, destination, null, source));
     }
     private Operand snapshot(Operand source) {
         Operand copy = temporary();
@@ -137,8 +140,13 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
     }
 
     private Operand variable(Expr expression, String name) {
+        return variable(expression, name, null);
+    }
+
+    // 'where' so importa para globais: o erro "Variavel indefinida" precisa da posicao do nome.
+    private Operand variable(Expr expression, String name, ka.SourceLocation where) {
         Integer depth = locals.get(expression);
-        if (depth == null) return Operand.variable(name);
+        if (depth == null) return Operand.variable(name).at(where);
         if (currentFunction != null) {
             int functionScopeCount = scopes.size() - currentFunction.enclosingScopeCount;
             if (depth >= functionScopeCount) {
@@ -154,7 +162,8 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
         return "fn" + functionNumber + "_" + (declaredName == null ? "anonymous" : declaredName);
     }
 
-    private FunctionContext compileFunction(String name, List<ka.Symbol> parameters, List<Stmt> body) {
+    private FunctionContext compileFunction(String name, String declaredName,
+                                            List<ka.Symbol> parameters, List<Stmt> body) {
         int functionIndex = functions.size();
         functions.add(null); // Reserva o slot antes das funcoes aninhadas: ordem pre-ordem.
 
@@ -178,7 +187,7 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
             for (Stmt statement : body) statement.accept(this);
             emit(TacInstruction.of(Op.RETURN, null, null, Operand.constant(null)));
             functions.set(functionIndex,
-                new TacFunction(name, parameterBindings, context.upvalueNames(), bodyInstructions));
+                new TacFunction(name, parameterBindings, context.upvalueNames(), bodyInstructions, declaredName));
         } finally {
             endScope();
             activeInstructions = enclosingInstructions;
@@ -188,7 +197,7 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
     }
 
     private Operand closure(String declaredName, List<ka.Symbol> parameters, List<Stmt> body) {
-        FunctionContext context = compileFunction(functionName(declaredName), parameters, body);
+        FunctionContext context = compileFunction(functionName(declaredName), declaredName, parameters, body);
         Operand result = temporary();
         emit(new TacInstruction(Op.MAKE_CLOSURE, result, context.captureSources(), context.name));
         return result;
@@ -258,7 +267,7 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
     }
 
     @Override public Operand visitVariableExpr(Expr.Variable expr) {
-        return variable(expr, expr.name.name());
+        return variable(expr, expr.name.name(), expr.name.location());
     }
 
     @Override public Operand visitThisExpr(Expr.This expr) {
@@ -267,7 +276,7 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
 
     @Override public Operand visitAssignExpr(Expr.Assign expr) {
         Operand value = expr.value.accept(this);
-        move(variable(expr, expr.name.name()), value);
+        move(variable(expr, expr.name.name(), expr.name.location()), value).at(expr.name.location());
         return value;
     }
 
@@ -275,14 +284,16 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
         Operand left = snapshotIfMutable(expr.left.accept(this));
         Operand right = expr.right.accept(this);
         Operand result = temporary();
-        emit(TacInstruction.of(Op.BINARY, result, expr.operator.toString(), left, right));
+        emit(TacInstruction.of(Op.BINARY, result, expr.operator.toString(), left, right))
+            .at(expr.operator.location());
         return result;
     }
 
     @Override public Operand visitUnaryExpr(Expr.Unary expr) {
         Operand operand = expr.right.accept(this);
         Operand result = temporary();
-        emit(TacInstruction.of(Op.UNARY, result, expr.operator.toString(), operand));
+        emit(TacInstruction.of(Op.UNARY, result, expr.operator.toString(), operand))
+            .at(expr.operator.location());
         return result;
     }
 
@@ -301,16 +312,17 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
     @Override public Operand visitGetExpr(Expr.Get expr) {
         Operand object = snapshotIfMutable(expr.object.accept(this));
         Operand result = temporary();
-        emit(TacInstruction.of(Op.GET_PROPERTY, result, expr.name.name(), object));
+        emit(TacInstruction.of(Op.GET_PROPERTY, result, expr.name.name(), object)).at(expr.name.location());
         return result;
     }
 
     @Override public Operand visitSetExpr(Expr.Set expr) {
         Operand object = snapshotIfMutable(expr.object.accept(this));
-        emit(TacInstruction.of(Op.CHECK_OBJECT, null, null, object));
+        // detail "campos": so escolhe a mensagem de erro; render() nao imprime o detalhe de CHECK_OBJECT.
+        emit(TacInstruction.of(Op.CHECK_OBJECT, null, "campos", object)).at(expr.name.location());
         Operand value = expr.value.accept(this);
         Operand result = temporary();
-        emit(TacInstruction.of(Op.SET_PROPERTY, result, expr.name.name(), object, value));
+        emit(TacInstruction.of(Op.SET_PROPERTY, result, expr.name.name(), object, value)).at(expr.name.location());
         return result;
     }
 
@@ -319,7 +331,8 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
         emit(TacInstruction.of(Op.CREATE_OBJECT, object, null));
         for (int i = 0; i < expr.keys.size(); i++) {
             Operand value = expr.values.get(i).accept(this);
-            emit(TacInstruction.of(Op.SET_PROPERTY, temporary(), expr.keys.get(i).name(), object, value));
+            emit(TacInstruction.of(Op.SET_PROPERTY, temporary(), expr.keys.get(i).name(), object, value))
+                .at(expr.keys.get(i).location());
         }
         return object;
     }
@@ -330,9 +343,9 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
         if (expr.callee instanceof Expr.Get) {
             Expr.Get get = (Expr.Get) expr.callee;
             receiver = snapshotIfMutable(get.object.accept(this));
-            emit(TacInstruction.of(Op.CHECK_OBJECT, null, null, receiver));
+            emit(TacInstruction.of(Op.CHECK_OBJECT, null, "propriedades", receiver)).at(get.name.location());
             callee = temporary();
-            emit(TacInstruction.of(Op.GET_PROPERTY, callee, get.name.name(), receiver));
+            emit(TacInstruction.of(Op.GET_PROPERTY, callee, get.name.name(), receiver)).at(get.name.location());
         } else {
             callee = snapshotIfMutable(expr.callee.accept(this));
         }
@@ -341,16 +354,18 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
         for (Expr argument : expr.arguments) {
             arguments.add(snapshotIfMutable(argument.accept(this)));
         }
-        emit(TacInstruction.of(Op.CHECK_CALLABLE, null, null, callee));
-        emit(TacInstruction.of(Op.CHECK_ARITY, null, null, callee, Operand.constant(arguments.size())));
+        emit(TacInstruction.of(Op.CHECK_CALLABLE, null, null, callee)).at(expr.location);
+        emit(TacInstruction.of(Op.CHECK_ARITY, null, null, callee, Operand.constant(arguments.size())))
+            .at(expr.location);
         for (Operand argument : arguments) emit(TacInstruction.of(Op.PARAM, null, null, argument));
 
         Operand result = temporary();
         if (receiver == null) {
-            emit(TacInstruction.of(Op.CALL, result, null, callee, Operand.constant(arguments.size())));
+            emit(TacInstruction.of(Op.CALL, result, null, callee, Operand.constant(arguments.size())))
+                .at(expr.location);
         } else {
             emit(TacInstruction.of(Op.CALL, result, null,
-                callee, Operand.constant(arguments.size()), receiver));
+                callee, Operand.constant(arguments.size()), receiver)).at(expr.location);
         }
         return result;
     }
@@ -373,14 +388,14 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
             for (Map.Entry<String, Operand> entry : bindings.entrySet()) {
                 Operand local = Operand.variable(entry.getKey() + "$" + (++bindingNumber));
                 scopes.peek().bindings.put(entry.getKey(), local);
-                move(local, entry.getValue());
+                move(local, entry.getValue()).declare();
             }
             move(result, matchCase.body.accept(this));
             endScope();
             emit(TacInstruction.of(Op.GOTO, null, null, end));
             emit(TacInstruction.of(Op.LABEL, next, null));
         }
-        emit(TacInstruction.of(Op.MATCH_ERROR, null, expr.location.toString(), subject));
+        emit(TacInstruction.of(Op.MATCH_ERROR, null, expr.location.toString(), subject)).at(expr.location);
         emit(TacInstruction.of(Op.LABEL, end, null));
         return result;
     }
@@ -399,7 +414,7 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
             destination = Operand.variable(stmt.name.name() + "$" + (++bindingNumber));
             scopes.peek().bindings.put(stmt.name.name(), destination);
         }
-        move(destination, initializer);
+        move(destination, initializer).declare();
         return null;
     }
 
@@ -472,9 +487,10 @@ public final class TacBuilder implements Expr.Visitor<Operand>, Stmt.Visitor<Voi
         } else {
             destination = Operand.variable(stmt.name.name() + "$" + (++bindingNumber));
             scopes.peek().bindings.put(stmt.name.name(), destination);
-            move(destination, Operand.constant(null)); // Reserva a celula para recursao local.
+            move(destination, Operand.constant(null)).declare(); // Reserva a celula para recursao local.
         }
-        move(destination, closure(stmt.name.name(), stmt.params, stmt.body));
+        TacInstruction definition = move(destination, closure(stmt.name.name(), stmt.params, stmt.body));
+        if (scopes.isEmpty()) definition.declare(); // funcao global: define a global
         return null;
     }
 

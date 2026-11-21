@@ -1,0 +1,41 @@
+var animal = { nome: "animal", som: fun() { return "..."; },
+  apresenta: fun() { return this.nome + " faz " + this.som(); } };
+var cao = Object.create(animal);
+cao.nome = "Rex"; cao.som = fun() { return "au"; };
+print cao.apresenta(); print animal.apresenta();
+var filhote = Object.create(cao);
+filhote.nome = "Bolinha";
+print filhote.apresenta();
+print filhote.__proto__ == cao; print cao.__proto__ == animal; print animal.__proto__;
+filhote.__proto__ = animal;
+print filhote.apresenta();
+var o = { n: 0 };
+o.inc = fun() { this.n = this.n + 1; return this; };
+o.inc().inc().inc(); print o.n;
+fun novoContador(inicio) {
+  var obj = { v: inicio };
+  obj.soma = fun(k) { this.v = this.v + k; return this.v; };
+  return obj;
+}
+var c1 = novoContador(10); var c2 = novoContador(100);
+print c1.soma(1); print c2.soma(1); print c1.soma(1);
+var base = { x: 1 }; var d = Object.create(base);
+d.x = 2; print base.x; print d.x;
+base.y = 5; print d.y;
+var a = { b: { c: { d: 42 } } };
+print a.b.c.d; a.b.c.d = 43; print a.b.c.d;
+var m = { f: fun() { return this; } };
+print m.f() == m;
+var met = { v: 7, get: fun() { return this.v; } };
+fun chama(o) { return o.get(); }
+print chama(met);
+var outro = { v: 9, get: met.get };
+print outro.get();
+var met2 = { v: 1, mk: fun() { return fun() { return 1; }; } };
+print met2.mk()();
+var pilha = { itens: nil };
+pilha.push = fun(x) { this.itens = { v: x, prox: this.itens }; };
+pilha.pop = fun() { var t = this.itens.v; this.itens = this.itens.prox; return t; };
+pilha.push(1); pilha.push(2); pilha.push(3);
+print pilha.pop(); print pilha.pop(); print pilha.pop();
+print animal; print animal.som; print Object; print Object.create; print clock;

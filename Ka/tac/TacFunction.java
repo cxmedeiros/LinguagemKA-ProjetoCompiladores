@@ -10,6 +10,7 @@ public final class TacFunction {
     private final List<String> parameters;
     private final List<String> upvalues;
     private final List<TacInstruction> instructions;
+    private final String sourceName; // nome na Ka (null = anonima); nao e serializado
 
     public TacFunction(String name, List<String> parameters, List<TacInstruction> instructions) {
         this(name, parameters, Collections.<String>emptyList(), instructions);
@@ -17,16 +18,23 @@ public final class TacFunction {
 
     public TacFunction(String name, List<String> parameters, List<String> upvalues,
                        List<TacInstruction> instructions) {
+        this(name, parameters, upvalues, instructions, null);
+    }
+
+    public TacFunction(String name, List<String> parameters, List<String> upvalues,
+                       List<TacInstruction> instructions, String sourceName) {
         if (name == null || name.isEmpty()) throw new IllegalArgumentException("Nome de funcao vazio.");
         this.name = name;
         this.parameters = Collections.unmodifiableList(new ArrayList<>(parameters));
         this.upvalues = Collections.unmodifiableList(new ArrayList<>(upvalues));
         this.instructions = Collections.unmodifiableList(new ArrayList<>(instructions));
+        this.sourceName = sourceName;
     }
     public String name() { return name; }
     public List<String> parameters() { return parameters; }
     public List<String> upvalues() { return upvalues; }
     public List<TacInstruction> instructions() { return instructions; }
+    public String sourceName() { return sourceName; }
 
     String render() {
         StringBuilder out = new StringBuilder(name).append(":\n");

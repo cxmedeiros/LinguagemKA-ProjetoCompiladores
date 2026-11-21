@@ -1,0 +1,1 @@
+fun mk() { var x = "s"; return fun() { return x - 1; }; } print "antes"; mk()();

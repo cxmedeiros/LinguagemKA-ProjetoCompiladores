@@ -1,0 +1,37 @@
+var a = "global";
+{
+  fun mostraA() { print a; }
+  mostraA();
+  var a = "bloco";
+  mostraA();
+  print a;
+}
+print a;
+fun f() { var a = "f"; { var a = "interno"; print a; } print a; }
+f(); print a;
+var x = 1;
+fun leX() { return x; }
+print leX(); x = 2; print leX();
+fun sombra(x) { x = x + 100; return x; }
+print sombra(5); print x;
+fun outer() {
+  var v = "outer";
+  fun inner() { return v; }
+  var r1 = inner();
+  v = "mudou";
+  return r1 + "," + inner();
+}
+print outer();
+{
+  fun fatorial(n) { if (n <= 1) return 1; return n * fatorial(n - 1); }
+  print fatorial(10);
+}
+{ var q = 1; { var q = 2; { var q = 3; print q; } print q; } print q; }
+var z = 10;
+{ var z2 = z; var z = 20; print z2; print z; }
+print z;
+fun redefine() { var t = 1; fun t2() { return t; } t = 2; return t2(); }
+print redefine();
+var nome = "g";
+fun ler() { return nome; }
+{ var nome = "l"; print ler(); }

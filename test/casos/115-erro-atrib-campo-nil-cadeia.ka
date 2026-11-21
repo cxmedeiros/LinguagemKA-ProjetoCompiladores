@@ -1,0 +1,1 @@
+var o = { a: nil }; print "antes"; o.a.b = 1;

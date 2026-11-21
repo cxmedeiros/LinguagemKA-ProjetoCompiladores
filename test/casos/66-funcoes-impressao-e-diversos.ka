@@ -1,0 +1,28 @@
+fun anonymous() { return 1; }
+print anonymous; print anonymous();
+var f = fun() { return 2; };
+print f; print f();
+var o = { m: fun() { return 1; } };
+print o.m; print o;
+var x; print x; x = 5; print x;
+fun semParam() { return 7; }
+print semParam();
+print clock() > 0;
+var s = "linha"; print s;
+if (nil) print "n"; else print "else";
+if (0) print "zero-verdadeiro";
+if ("") print "string-vazia-verdadeira";
+var i = 0; while (i < 3) i = i + 1; print i;
+for (var j = 0; j < 3; j = j + 1) print j;
+var n = 0;
+for (; n < 2; n = n + 1) print n;
+{ var a = 1; { var b = 2; print a + b; } }
+print "a" + "b" + "c";
+print "x" == "x" and 1 < 2;
+if (1 < 2) { print "bloco-if"; } else { print "nao"; }
+if (1 > 2) print "nao"; else if (2 > 1) print "else-if"; else print "nao";
+fun mkObj() { return { a: 1, f: fun() { return this.a; } }; }
+print mkObj().f();
+print { a: 1 }.a;
+var chain = { a: { b: fun() { return { c: fun() { return 99; } }; } } };
+print chain.a.b().c();

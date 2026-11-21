@@ -1,0 +1,1 @@
+var o = {}; print match (o) { case Int(i) => 1; };

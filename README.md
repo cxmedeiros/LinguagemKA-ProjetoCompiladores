@@ -17,7 +17,8 @@ A arquitetura utiliza como referência conceitos apresentados em *Crafting Inter
 
 ## Fluxo do projeto
 
-Atualmente, o processamento da Ka segue este fluxo:
+O processamento da Ka segue este fluxo. Não existe mais interpretador de AST: o programa
+é sempre executado a partir do TAC.
 
 ```text
 Código-fonte (.ka)
@@ -30,12 +31,20 @@ Código-fonte (.ka)
         ↓
        AST
         ↓
-   AstPrinter
+     Resolver   (escopo léxico + erros semânticos; produz locals: Expr → distância)
         ↓
-Representação textual da AST
+    TacBuilder  (AST + locals → TAC; cada variável local vira um nome único `x$N`)
+        ↓
+   TacProgram
+        ↓
+  TacInterpreter (executa o TAC instrução a instrução)
 ```
 
-O projeto atual termina na construção e visualização da AST. A execução semântica completa da linguagem não faz parte desta etapa.
+O `Resolver` continua sendo necessário: o `TacBuilder` usa o resultado dele para decidir a qual
+declaração cada nome se refere (por exemplo, `a` global contra `a$2` local) e quais variáveis são
+capturadas por closures. Não existe mais `Environment`: as variáveis locais vivem em um quadro por
+chamada, cada uma numa `Cell` (as closures guardam a própria `Cell`, então enxergam as mudanças), e as
+globais ficam em um mapa no `TacInterpreter`.
 
 ---
 
@@ -691,14 +700,20 @@ LinguagemKA-ProjetoCompiladores/
 │   │   └── TacProgram.java
 │   │
 │   ├── AstPrinter.java
+│   ├── Cell.java
 │   ├── Ka.java
+│   ├── KaCallable.java
+│   ├── KaFunction.java
+│   ├── KaObject.java
 │   ├── Operator.java
 │   ├── Parser.java
 │   ├── Scanner.java
 │   ├── SourceLocation.java
 │   ├── Symbol.java
+│   ├── TacInterpreter.java
 │   ├── Token.java
-│   └── TokenType.java
+│   ├── TokenType.java
+│   └── Values.java
 │
 ├── tool/
 │   └── GenerateAst.java
@@ -711,7 +726,11 @@ LinguagemKA-ProjetoCompiladores/
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `Ka.java` | Ponto de entrada e integração do front-end, Interpreter e modo TAC |
+| `Ka.java` | Ponto de entrada: Scanner → Parser → Resolver → TacBuilder → TacInterpreter |
+| `TacInterpreter.java` | Executa o TAC (laço com `pc`, quadros por chamada, globais e funções nativas) |
+| `Values.java` | Regras de valor da Ka: aritmética int/float, igualdade, verdade, tipos |
+| `KaFunction.java`, `Cell.java` | Closure em TAC (código + células capturadas + `this`) e a célula de variável compartilhada |
+| `KaObject.java` | Objeto protótipo (campos + `__proto__`) |
 | `Ka/tac/` | Representação intermediária, gerador e validador de TAC |
 | `Scanner.java` | Análise léxica |
 | `Token.java` | Representação de um token |
@@ -953,8 +972,8 @@ Entre as adaptações presentes na versão atual estão:
     java -cp out ka.Ka arquivo.ka            # executa o programa
     java -cp out ka.Ka                       # REPL (as variaveis persistem entre linhas)
     java -cp out ka.Ka --debug arquivo.ka    # so o front-end: tokens + arvore (nao executa)
-    java -cp out ka.Ka --trace               # REPL (ou arquivo) com tudo: tokens, arvore e
-                                             # passo a passo da execucao ([exec] ...)
+    java -cp out ka.Ka --trace               # REPL (ou arquivo) com tudo: tokens, arvore, TAC e
+                                             # passo a passo da execucao do TAC ([exec] ...)
     java -cp out ka.Ka --tac arquivo.ka      # gera TAC sem executar o programa
     java -cp out ka.Ka --tac                 # REPL TAC, sem prompts misturados na saida
 
@@ -965,7 +984,10 @@ Erros lexicos, sintaticos ou semanticos retornam 65 e deixam stdout vazio. O TAC
 fluxo de controle, funcoes/closures e `match`; operacoes dinamicas permanecem genericas.
 
 No `--trace`, cada valor aparece com o tipo (`10:int`, `10.0:float`) e cada operacao mostra
-o resultado, por exemplo `2:int + 5.2:float -> 7.2:float`.
+o resultado, por exemplo `2:int + 5.2:float -> 7.2:float`. O trace acompanha as instrucoes TAC
+executadas: declaracoes e atribuicoes de variaveis (`var x = ...`), operacoes binarias e unarias,
+`chamada`/`retorno` (indentados pela profundidade) e testes de tipo do `match`
+(`is_type 41:int, Int -> true:boolean`).
 
 ## Testes
 
@@ -989,6 +1011,8 @@ o resultado, por exemplo `2:int + 5.2:float -> 7.2:float`.
 | 53 | REPL: variaveis persistem entre linhas e um erro nao derruba a sessao |
 | 54, 55, 56 | flags `--trace` e `--debug` |
 | 57 | verdade (so `nil`/`false` sao falsos) e curto-circuito de `and`/`or` |
+| 58-68 | cobertura do executor de TAC: closures mutaveis e em laco, escopo lexico, objetos/`this`, match completo, switch, ordem de avaliacao, numeros, recursao, funcoes/impressao, `Object.create`, REPL com closures e erros |
+| 69-116 | erros de execucao (exit 70) com linha e coluna em cada contexto: variavel/atribuicao indefinida, chamada de nao-funcao, aridade (global, metodo, anonima), propriedade/campo em nao-objeto, `this` solto, operandos invalidos, divisao por zero, estouro de inteiro e de pilha, prototipos invalidos, `match` sem caso, erro dentro de argumento/closure/metodo/switch |
 
 Notas sobre o formato do shelltest: a regex casa um trecho **dentro de uma linha**
 (`.` nao atravessa `\n`; para varias linhas use `[[:space:]]*`); uma linha de saida esperada

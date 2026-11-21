@@ -1,0 +1,1 @@
+fun a() { return b(); } fun b() { return c(); } fun c() { return 1 + nil; } print "antes"; a();

@@ -10,6 +10,9 @@ public final class TacInstruction {
     private final Operand result;
     private final List<Operand> operands;
     private final String detail;
+    // Metadados de execucao, NAO serializados (render() e o formato do --tac ficam iguais):
+    private boolean declaration;           // MOVE que DECLARA a variavel (var / function / binding de match)
+    private ka.SourceLocation location;    // posicao no codigo-fonte, para os erros de execucao
 
     public TacInstruction(Op op, Operand result, List<Operand> operands, String detail) {
         if (op == null) throw new IllegalArgumentException("Operacao ausente.");
@@ -30,6 +33,14 @@ public final class TacInstruction {
     public Operand result() { return result; }
     public List<Operand> operands() { return operands; }
     public String detail() { return detail; }
+    public boolean isDeclaration() { return declaration; }
+    public ka.SourceLocation location() { return location; }
+
+    /** Marca este MOVE como declaracao: cria uma variavel nova (celula nova) a cada execucao. */
+    public TacInstruction declare() { this.declaration = true; return this; }
+
+    /** Guarda a posicao no codigo-fonte. */
+    public TacInstruction at(ka.SourceLocation where) { this.location = where; return this; }
 
     public String render() {
         switch (op) {

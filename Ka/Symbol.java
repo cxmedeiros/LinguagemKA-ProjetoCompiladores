@@ -28,6 +28,11 @@ public class Symbol {
         return name;
     }
 
+    // Posicao no codigo-fonte (o TacBuilder a guarda nas instrucoes para os erros de execucao).
+    public SourceLocation location() {
+        return location;
+    }
+
     @Override
     public String toString() {
         return name;
